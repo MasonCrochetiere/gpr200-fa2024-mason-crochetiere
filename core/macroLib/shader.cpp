@@ -1,4 +1,4 @@
 #include "shader.h"
-namespace macroLib {
+namespace bob {
 
 }

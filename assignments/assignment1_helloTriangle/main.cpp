@@ -46,9 +46,9 @@ void main()
 
 }
 )";
-// same deal as vertex shader source; code we send to the GPU to generate color. 
-// the variable's name is arbitrary
-// the Color variable comes in from where it is caught in the vertexShader with the 'in' - it needs to have the exact same name
+ //same deal as vertex shader source; code we send to the GPU to generate color. 
+ //the variable's name is arbitrary
+ //the Color variable comes in from where it is caught in the vertexShader with the 'in' - it needs to have the exact same name
 
 int main() {
 	printf("Initializing...");
