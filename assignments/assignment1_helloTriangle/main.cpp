@@ -6,6 +6,9 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
+#include <macroLib/shader.h>
+using namespace macroLib;
+
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
 
@@ -67,6 +70,8 @@ int main() {
 		return 1;
 	}
 
+	Shader ourShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
@@ -86,58 +91,6 @@ int main() {
 	// same as above function. the final parameter is the offset (in bytes) to retrieve the data
 	glEnableVertexAttribArray(1);
 	
-
-	unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER); // similar to VBO, populating vertexShader
-	glShaderSource(vertexShader, 1, &vertexShaderSource, NULL); // apply our source code to this shader. the 1 means we're only supplying 1 shader
-	glCompileShader(vertexShader); // same as compiling any other code. Could fail...
-
-	int success;
-	char infoLog[512]; // arbitrary number to hold error log
-
-	glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success); 
-	if (!success)
-	{
-		
-		glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-		printf("ERROR::SHADER::VERTEX::COMPILATION_FAILED\n%s", infoLog);
-	}
-
-	unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER); // similar to VBO, populating vertexShader
-	glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL); // apply our source code to this shader. the 1 means we're only supplying 1 shader
-	glCompileShader(fragmentShader); // same as compiling any other code. Could fail...
-
-	glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-	if (!success)	
-	{
-		glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-		printf("ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n%s", infoLog);
-	}
-
-	unsigned int shaderProgram;
-	shaderProgram = glCreateProgram(); // program combines shaders
-	glAttachShader(shaderProgram, vertexShader); 
-	glAttachShader(shaderProgram, fragmentShader); // attach our vertex and color shaders
-	glLinkProgram(shaderProgram); // links shaders all together
-
-	glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-	if (!success)
-	{
-		glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-		printf("ERROR::PROGRAM::LINKING_FAILED\n%s", infoLog);
-	}
-
-	glUseProgram(shaderProgram); // need to make sure we use the program :)
-	// consider using this during game loop instead, esp if swapping between multiple program
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-	// shader cleanup
-
-	//glBindBuffer(GL_ARRAY_BUFFER, 0); // sets the buffer to mess with to be 0, so nothing
-
-	int vertexColorLocation = glGetUniformLocation(shaderProgram, "uTime");
-	int vertexPosLocation = glGetUniformLocation(shaderProgram, "uTimeCos");
-	
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -146,13 +99,11 @@ int main() {
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// be sure to activate the shader
-		glUseProgram(shaderProgram);
+		ourShader.use();
 
 		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-
 		float timeValue = glfwGetTime();
-		
-		glUniform1f(vertexColorLocation, timeValue); // sin(timeValue) / 2.0f + 0.5f);
+		ourShader.setFloat("uTime", timeValue);
 
 		glBindVertexArray(VAO);
 		glDrawArrays(GL_TRIANGLES, 0, 3);
