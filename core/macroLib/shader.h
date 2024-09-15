@@ -2,7 +2,7 @@
 
 #include "../ew/external/glad.h"
 
-namespace bob
+namespace macroLib
 {
 	class Shader {
 
