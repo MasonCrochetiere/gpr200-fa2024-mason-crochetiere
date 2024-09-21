@@ -6,10 +6,8 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "ew/external/stb_image.h"
-
 #include <macroLib/shader.h>
+#include <macroLib/texture2D.h>
 using namespace macroLib;
 
 const int SCREEN_WIDTH = 1080;
@@ -46,31 +44,7 @@ int main() {
 		return 1;
 	}
 
-	// TEXTURE GENERATION START
-	unsigned int texture;
-	glGenTextures(1, &texture); // 1, so this unsigned int stores the location of one texture
-	glBindTexture(GL_TEXTURE_2D, texture); // bind this as the texture 2d to work on
-
-	// set the texture wrapping/filtering options (on the currently bound texture object)
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-	int width, height, nrChannels;
-	unsigned char* data = stbi_load("assets/BigChungus.jpg", &width, &height, &nrChannels, 0);// loading these ints with data from that file
-	if (data)
-	{
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-		// crazy list of parameters: object type target, mipmap level, value format, width, height, legacy 0, color format, texture datatype, location of data
-		glGenerateMipmap(GL_TEXTURE_2D);
-	}
-	else
-	{
-		std::cout << "Failed to load texture" << std::endl;
-	}
-	stbi_image_free(data); // don't need the space going forward
-	// TEXTURE GENERATION COMPLETE
+	Texture2D texture("assets/BigChungus.jpg", 0, 0);
 
 	Shader ourShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 
@@ -115,7 +89,7 @@ int main() {
 		float timeValue = glfwGetTime();
 		ourShader.setFloat("uTime", timeValue);
 
-		glBindTexture(GL_TEXTURE_2D, texture);
+		texture.Bind();
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
