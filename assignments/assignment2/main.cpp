@@ -115,7 +115,7 @@ int main() {
 		float timeValue = glfwGetTime();
 		ourShader.setFloat("uTime", timeValue);
 
-		//glBindTexture(GL_TEXTURE_2D, texture);
+		glBindTexture(GL_TEXTURE_2D, texture);
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 
