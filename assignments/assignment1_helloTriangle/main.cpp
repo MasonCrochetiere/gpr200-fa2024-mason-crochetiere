@@ -106,7 +106,7 @@ int main() {
 		ourShader.setFloat("uTime", timeValue);
 
 		glBindVertexArray(VAO);
-		glDrawArrays(GL_TRIANGLES, 0, 3);
+		glDrawArrays(GL_TRIANGLES, 0, 3); // if you use indices, this should be glDrawElements
 		//Drawing happens here!
 		glfwSwapBuffers(window);
 	}
