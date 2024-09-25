@@ -19,11 +19,13 @@ namespace macroLib {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
+		stbi_set_flip_vertically_on_load(true);
+
 		//int m_width, m_height, m_nrChannels;
 		unsigned char* data = stbi_load(filePath, &m_width, &m_height, &m_nrChannels, 0);// loading these ints with data from that file
 		if (data)
 		{
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, m_width, m_height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, m_width, m_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
 			// crazy list of parameters: object type target, mipmap level, value format, width, height, legacy 0, color format, texture datatype, location of data
 			glGenerateMipmap(GL_TEXTURE_2D);
 		}
@@ -43,8 +45,7 @@ namespace macroLib {
 
     void Texture2D::Bind(unsigned int slot) //Bind to a specific texture unit
     {
-		// SLOT NOT IMPLEMENTED.
-		// not super sure what it's for
+		glActiveTexture(slot);
 		glBindTexture(GL_TEXTURE_2D, m_id);	
     }
 }
