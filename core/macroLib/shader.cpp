@@ -100,4 +100,15 @@ namespace macroLib {
     {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
+
+    void Shader::setMat4(const std::string name, const glm::mat4& m) const {
+        glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &m[0][0]);
+    }
+
+    // combining the translate, rotate, and scale matrix into one template that we apply pos to next
+    // scale first, then rotate, then translate. This is written in reverse order by multiplication apparently
+
+    // this matrix is a model matrix; it brings an object from model space to world space
+    // don't really make this in the vertex shader. it hurts performance and will not let us use this information for game logic.
+    // instead the matrix is best as a uniform passed to the vertex shader
 }
