@@ -28,6 +28,7 @@ glm::mat4 scale(float x, float y, float z) {
 	);
 }
 
+// roll. expects radians
 glm::mat4 rotateZ(float a) {
 	glm::mat4 m;
 	// left is column, right is row
@@ -41,6 +42,46 @@ glm::mat4 rotateZ(float a) {
 	return m;
 }
 
+// pitch. expects radians
+glm::mat4 rotateX(float a) {
+	glm::mat4 m;
+	// left is column, right is row
+	m[0][0] = 1;
+	m[1][1] = cos(a);
+	m[2][1] = -sin(a);
+	m[1][2] = sin(a);
+	m[2][2] = cos(a);
+	m[3][3] = 1;
+
+	return m;
+}
+
+// yaw. expects radians
+glm::mat4 rotateY(float a) {
+	glm::mat4 m;
+	// left is column, right is row
+	m[0][0] = cos(a);
+	m[0][2] = -sin(a);
+	m[2][0] = sin(a);
+	m[2][2] = cos(a);
+	m[1][1] = 1;
+	m[3][3] = 1;
+
+	return m;
+}
+
+glm::mat4 rotate(float x, float y, float z) {
+	glm::mat4 m;
+
+	// this order matters
+	m = rotateZ(z);
+	m = rotateX(x) * m;
+	m = rotateY(y) * m;
+	// not sure if the * m is right at all
+
+	return m;
+}
+
 glm::mat4 translate(float x, float y, float z) {
 	glm::mat4 m = glm::mat4(1); // Identity matrix. Not filling everything with 1
 	m[3][0] = x;
@@ -48,6 +89,17 @@ glm::mat4 translate(float x, float y, float z) {
 	m[3][2] = z;
 
 	return m;
+}
+
+glm::mat4 lookAt(glm::vec3 camera, glm::vec3 target, glm::vec3 worldUp)
+{
+	glm::vec3 forward = glm::normalize(target - camera);
+	glm::vec3 right = glm::normalize(glm::cross(forward, worldUp));
+	glm::vec3 localUp = glm::normalize(glm::cross(right, forward));
+
+	// creating orthagonal vectors here
+	// they will go in this lookat matrix from here i believe
+	// called the graham-schmidt process
 }
 
 const char* vertexShaderSource = R"(
