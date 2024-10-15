@@ -11,6 +11,7 @@
 
 #include <macroLib/shader.h>
 #include <macroLib/texture2D.h>
+#include <macroLib/camera.h>
 using namespace macroLib;
 
 const int SCREEN_WIDTH = 1080;
@@ -125,15 +126,15 @@ int main() {
 		return 1;
 	}
 
-	glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-	glfwSetCursorPosCallback(window, mouse_callback);
-	glfwSetScrollCallback(window, scroll_callback);
+	Camera camera(window);
+
+	//glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+	//glfwSetCursorPosCallback(window, mouse_callback);
+	//glfwSetScrollCallback(window, scroll_callback);
 
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
-
-	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
 	Texture2D texture("assets/BigChungusTransparent.png", 0, 0);
 	Texture2D texture1("assets/BG1.png", 0, 0);
@@ -180,13 +181,15 @@ int main() {
 		glfwPollEvents();
 		// per-frame time logic
 		// --------------------
-		float currentFrame = static_cast<float>(glfwGetTime());
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		//float currentFrame = static_cast<float>(glfwGetTime());
+		//deltaTime = currentFrame - lastFrame;
+		//lastFrame = currentFrame;
+		camera.updateTime();
 
 		// input
 		// -----
-		processInput(window);
+		camera.processInput(window);
+		//processInput(window);
 
 		//Clear framebuffer
 		glClearColor(0.3f, 0.4f, 0.9f, 1.0f);
@@ -209,14 +212,14 @@ int main() {
 		glm::mat4 projection = glm::mat4(1.0f);
 	
 		// note that we're translating the scene in the reverse direction of where we want to move
-		view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
+		view = glm::lookAt(camera.getCameraPos(), camera.getCameraPos() + camera.getCameraFront(), camera.getCameraUp());
 		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
 		model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 				
 		//projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
 		// pass projection matrix to shader (note that in this case it could change every frame)
-		projection = glm::perspective(glm::radians(fov), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
 		charShader.setMat4("projection", projection);
 
 		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
@@ -232,11 +235,6 @@ int main() {
 		charShader.setMat4("projection", projection);
 		// same for View Matrix and Projection Matrix
 
-		//texture.Bind();
-		//glBindVertexArray(VAO);
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
-		//glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
 		glBindVertexArray(VAO);
 		for (unsigned int i = 0; i < 10; i++)
 		{
@@ -250,8 +248,6 @@ int main() {
 		}
 
 		glBindVertexArray(0); 
-
-
 
 		//Drawing happens here!
 		glfwSwapBuffers(window);
