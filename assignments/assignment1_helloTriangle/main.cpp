@@ -100,6 +100,8 @@ glm::mat4 lookAt(glm::vec3 camera, glm::vec3 target, glm::vec3 worldUp)
 	// creating orthagonal vectors here
 	// they will go in this lookat matrix from here i believe
 	// called the graham-schmidt process
+
+	// creating basis vectors
 }
 
 const char* vertexShaderSource = R"(
