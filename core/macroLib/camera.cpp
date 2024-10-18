@@ -16,11 +16,9 @@ namespace macroLib {
 		glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     }
 
-	void Camera::updateTime()
+	void Camera::updateTime(float newDeltaTime)
 	{
-		float currentFrame = static_cast<float>(glfwGetTime());
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
+		deltaTime = newDeltaTime;
 	}
 
 	// process all input: query GLFW whether relevant keys are pressed/released this frame and react accordingly
@@ -30,7 +28,11 @@ namespace macroLib {
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
 
-		float cameraSpeed = static_cast<float>(2.5f * deltaTime);
+		float sprint = 1.0f;
+		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+			sprint *= sprintSpeed;
+
+		float cameraSpeed = static_cast<float>(defaultSpeed * sprint * deltaTime);
 		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
 			cameraPos += cameraSpeed * cameraFront;
 		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
@@ -104,8 +106,8 @@ namespace macroLib {
 		camera->fov -= (float)yoffset;
 		if (camera->fov < 1.0f)
 			camera->fov = 1.0f;
-		if (camera->fov > 45.0f)
-			camera->fov = 45.0f;
+		if (camera->fov > 120.0f)
+			camera->fov = 120.0f;
 	}
 
 }

@@ -25,7 +25,7 @@ namespace macroLib
     public:
         Camera(GLFWwindow* window);
 
-        void updateTime();
+        void updateTime(float newDeltaTime);
 
         void processInput(GLFWwindow* window); // this function could potentially just use the window if it were saved from the constructor but i liked this better
         static void framebuffer_size_callback(GLFWwindow* window, int width, int height);
@@ -45,11 +45,13 @@ namespace macroLib
 
         float lastX = 800.0f / 2.0;
         float lastY = 600.0 / 2.0;
-        float fov = 45.0f;
+        float fov = 60.0f;
+
+        float defaultSpeed = 2.5f;
+        float sprintSpeed = 2.0f;
 
         // timing
         float deltaTime = 0.0f;	// time between current frame and last frame
-        float lastFrame = 0.0f;
 
         glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
         glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);

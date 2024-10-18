@@ -12,10 +12,19 @@
 #include <macroLib/shader.h>
 #include <macroLib/texture2D.h>
 #include <macroLib/camera.h>
+using namespace ew;
 using namespace macroLib;
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
+const int CUBE_COUNT = 20;
+
+const float NEAR_PLANE = 0.1f;
+const float FAR_PLANE = 1000.0f;
+
+// timing
+float deltaTime = 0.0f;	// time between current frame and last frame
+float lastFrame = 0.0f;
 
 float vertices[] = {
 	//  X      Y      Z      U     V
@@ -129,12 +138,33 @@ int main() {
 	// same as above function. the final parameter is the offset (in bytes) to retrieve the data
 	glEnableVertexAttribArray(1);
 
+	glm::vec3 cubes[CUBE_COUNT][3];
+	for (int i = 0; i < CUBE_COUNT; i++)
+	{
+		cubes[i][0].x = RandomRange(-4, 4);
+		cubes[i][0].y = RandomRange(-4, 4);
+		cubes[i][0].z = RandomRange(-0.5, -10);
+
+		cubes[i][1].x = RandomRange(0.5, 4);
+		cubes[i][1].y = RandomRange(0.5, 4);
+		cubes[i][1].z = RandomRange(0.5, 4);
+
+		cubes[i][2].x = RandomRange(0.1, 1.5);
+		cubes[i][2].y = RandomRange(0.1, 1.5);
+		cubes[i][2].z = RandomRange(0.1, 1.5);
+		
+	}
+
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
 		// per-frame time logic
-		camera.updateTime();
+		float currentFrame = static_cast<float>(glfwGetTime());
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
+
+		camera.updateTime(deltaTime);
 
 		// input
 		camera.processInput(window);
@@ -166,7 +196,7 @@ int main() {
 		model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
 				
 		// pass projection matrix to shader (note that in this case it could change every frame)
-		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, 0.1f, 100.0f);
+		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
 		charShader.setMat4("projection", projection);
 
 		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
@@ -180,12 +210,15 @@ int main() {
 		// same for View Matrix and Projection Matrix
 
 		glBindVertexArray(VAO);
-		for (unsigned int i = 0; i < 10; i++)
+		for (unsigned int i = 0; i < CUBE_COUNT; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			model = glm::translate(model, cubePositions[i]);
-			float angle = 20.0f * i * timeValue;
-			model = glm::rotate(model, glm::radians(angle), glm::vec3(1.0f, 0.3f, 0.5f));
+			
+			model = glm::translate(model, cubes[i][0]); //  c cubePositions[i]
+			float angle = 20.0f * (i+1) * glm::sin(timeValue);
+			model = glm::rotate(model, glm::radians(angle), cubes[i][1]); // glm::vec3(1.0f, 0.3f, 0.5f)  // 
+			model = glm::scale(model, cubes[i][2]);
+
 			charShader.setMat4("model", model);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
