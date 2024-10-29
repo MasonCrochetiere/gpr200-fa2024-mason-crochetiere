@@ -111,4 +111,8 @@ namespace macroLib {
     // this matrix is a model matrix; it brings an object from model space to world space
     // don't really make this in the vertex shader. it hurts performance and will not let us use this information for game logic.
     // instead the matrix is best as a uniform passed to the vertex shader
+
+    void Shader::setVec3(const std::string name, const glm::vec3& value) const {
+        glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
+    }
 }
