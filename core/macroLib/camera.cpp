@@ -28,23 +28,34 @@ namespace macroLib {
 		if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
 			glfwSetWindowShouldClose(window, true);
 
-		float sprint = 1.0f;
-		if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
-			sprint *= sprintSpeed;
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2))
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); //Locks mouse to screen.
 
-		float cameraSpeed = static_cast<float>(defaultSpeed * sprint * deltaTime);
-		if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
-			cameraPos += cameraSpeed * cameraFront;
-		if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
-			cameraPos -= cameraSpeed * cameraFront;
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
-			cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
-			cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
-		if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
-			cameraPos -= cameraSpeed * cameraUp;
-		if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
-			cameraPos += cameraSpeed * cameraUp;
+			float sprint = 1.0f;
+			if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+				sprint *= sprintSpeed;
+
+			float cameraSpeed = static_cast<float>(defaultSpeed * sprint * deltaTime);
+			if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+				cameraPos += cameraSpeed * cameraFront;
+			if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+				cameraPos -= cameraSpeed * cameraFront;
+			if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+				cameraPos -= glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+			if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+				cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
+			if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+				cameraPos -= cameraSpeed * cameraUp;
+			if (glfwGetKey(window, GLFW_KEY_E) == GLFW_PRESS)
+				cameraPos += cameraSpeed * cameraUp;
+		}
+		else
+		{
+			glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); //Unlocks mouse to use UI.
+		}
+
+
 	}
 
 	// glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -60,41 +71,45 @@ namespace macroLib {
 	// -------------------------------------------------------
 	void Camera::mouse_callback(GLFWwindow* window, double xposIn, double yposIn)
 	{
-		Camera* camera = (Camera*)glfwGetWindowUserPointer(window);
-
-		float xpos = static_cast<float>(xposIn);
-		float ypos = static_cast<float>(yposIn);
-
-		if (camera->firstMouse)
+		if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_2))
 		{
+			Camera* camera = (Camera*)glfwGetWindowUserPointer(window);
+
+			float xpos = static_cast<float>(xposIn);
+			float ypos = static_cast<float>(yposIn);
+
+			if (camera->firstMouse)
+			{
+				camera->lastX = xpos;
+				camera->lastY = ypos;
+				camera->firstMouse = false;
+			}
+
+			float xoffset = xpos - camera->lastX;
+			float yoffset = camera->lastY - ypos; // reversed since y-coordinates go from bottom to top
 			camera->lastX = xpos;
 			camera->lastY = ypos;
-			camera->firstMouse = false;
+
+			float sensitivity = 0.1f; // change this value to your liking
+			xoffset *= sensitivity;
+			yoffset *= sensitivity;
+
+			camera->yaw += xoffset;
+			camera->pitch += yoffset;
+
+			// make sure that when pitch is out of bounds, screen doesn't get flipped
+			if (camera->pitch > 89.0f)
+				camera->pitch = 89.0f;
+			if (camera->pitch < -89.0f)
+				camera->pitch = -89.0f;
+
+			glm::vec3 front;
+			front.x = cos(glm::radians(camera->yaw)) * cos(glm::radians(camera->pitch));
+			front.y = sin(glm::radians(camera->pitch));
+			front.z = sin(glm::radians(camera->yaw)) * cos(glm::radians(camera->pitch));
+			camera->cameraFront = glm::normalize(front);
+
 		}
-
-		float xoffset = xpos - camera->lastX;
-		float yoffset = camera->lastY - ypos; // reversed since y-coordinates go from bottom to top
-		camera->lastX = xpos;
-		camera->lastY = ypos;
-
-		float sensitivity = 0.1f; // change this value to your liking
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
-
-		camera->yaw += xoffset;
-		camera->pitch += yoffset;
-
-		// make sure that when pitch is out of bounds, screen doesn't get flipped
-		if (camera->pitch > 89.0f)
-			camera->pitch = 89.0f;
-		if (camera->pitch < -89.0f)
-			camera->pitch = -89.0f;
-
-		glm::vec3 front;
-		front.x = cos(glm::radians(camera->yaw)) * cos(glm::radians(camera->pitch));
-		front.y = sin(glm::radians(camera->pitch));
-		front.z = sin(glm::radians(camera->yaw)) * cos(glm::radians(camera->pitch));
-		camera->cameraFront = glm::normalize(front);
 	}
 
 	// glfw: whenever the mouse scroll wheel scrolls, this callback is called

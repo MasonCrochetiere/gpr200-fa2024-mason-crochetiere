@@ -9,6 +9,10 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
+
 #include <macroLib/shader.h>
 #include <macroLib/texture2D.h>
 #include <macroLib/camera.h>
@@ -27,6 +31,12 @@ float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
 glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
+glm::vec3 lightColor(0.5f, 0.5f, 0.5f);
+
+float ambientK = 0.1f;
+float diffuseK = 1.0f;
+float specularK = 0.08f;
+float shininess = 2.0f;
 
 float vertices[] = {
 	//  X      Y      Z      U     V     NX     NY     NZ
@@ -108,6 +118,11 @@ int main() {
 		return 1;
 	}
 
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui_ImplGlfw_InitForOpenGL(window, true);
+	ImGui_ImplOpenGL3_Init();
+
 	Camera camera(window);
 
 	// configure global opengl state
@@ -118,7 +133,8 @@ int main() {
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
 
-	Shader charShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	Shader cubeShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	Shader lightShader("assets/vertexShader.vert", "assets/lightFragmentShader.frag");
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 	unsigned int VAO;
@@ -189,11 +205,17 @@ int main() {
 		float timeValue = glfwGetTime();
 
 		// be sure to activate the shader
-		charShader.use();
+		cubeShader.use();
 
-		charShader.setVec3("lightPos", lightPos);
-		charShader.setVec3("lightColor", glm::vec3(0.5f, 0.5f, 0.5f));
-		charShader.setVec3("viewPos", camera.getCameraPos());
+		cubeShader.setVec3("lightPos", lightPos);
+		cubeShader.setVec3("lightColor", lightColor);
+		cubeShader.setVec3("viewPos", camera.getCameraPos());
+
+		cubeShader.setFloat("ambientStrength", ambientK);
+		cubeShader.setFloat("diffuseStrength", diffuseK);
+		cubeShader.setFloat("specularStrength", specularK);
+		cubeShader.setFloat("shininessStrength", shininess);
+		
 
 		texture.Bind(GL_TEXTURE0);
 
@@ -209,16 +231,16 @@ int main() {
 				
 		// pass projection matrix to shader (note that in this case it could change every frame)
 		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
-		charShader.setMat4("projection", projection);
+		cubeShader.setMat4("projection", projection);
 
 		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-		charShader.setFloat("uTime", timeValue);
+		cubeShader.setFloat("uTime", timeValue);
 
-		int viewLoc = glGetUniformLocation(charShader.ID, "view");
+		int viewLoc = glGetUniformLocation(cubeShader.ID, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
 
-		int projectionLoc = glGetUniformLocation(charShader.ID, "projection");
-		charShader.setMat4("projection", projection);
+		int projectionLoc = glGetUniformLocation(cubeShader.ID, "projection");
+		cubeShader.setMat4("projection", projection);
 		// same for View Matrix and Projection Matrix
 
 		glBindVertexArray(VAO);
@@ -231,12 +253,52 @@ int main() {
 			model = glm::rotate(model, glm::radians(angle), cubes[i][1]); // glm::vec3(1.0f, 0.3f, 0.5f)  // 
 			model = glm::scale(model, cubes[i][2]);
 
-			charShader.setMat4("model", model);
+			cubeShader.setMat4("model", model);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
 
+		lightShader.use();
+
+		lightShader.setMat4("projection", projection);
+
+		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
+		lightShader.setFloat("uTime", timeValue);
+		viewLoc = glGetUniformLocation(lightShader.ID, "view");
+		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+		projectionLoc = glGetUniformLocation(lightShader.ID, "projection");
+		lightShader.setMat4("projection", projection);
+
+		model = glm::mat4(1.0f);
+		model = glm::translate(model, lightPos);
+		lightShader.setMat4("model", model);
+		lightShader.setVec3("lightColor", lightColor);
+
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+
 		glBindVertexArray(0); 
+
+		// Start drawing ImGUI
+		ImGui_ImplGlfw_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui::NewFrame();
+
+		//Create a window called Settings
+		ImGui::Begin("Settings");
+		ImGui::Text("Add Controls Here!");
+
+		ImGui::DragFloat3("Light Position", &lightPos.x, 0.1f);
+		ImGui::ColorEdit3("Light Color", &lightColor.r);
+		ImGui::SliderFloat("Ambient K", &ambientK, 0.0f, 1.0f);
+		ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);
+		ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
+		ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
+
+		ImGui::End();
+
+		// Do the actual rendering with OpenGL
+		ImGui::Render();
+		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
 		//Drawing happens here!
 		glfwSwapBuffers(window);
