@@ -27,11 +27,15 @@ void main()
     vec3 diffuse = diff * lightColor;
 
     // specular
-    float specularStrength = 0.5;
+    float specularStrength = 0.08;
     vec3 viewDir = normalize(viewPos - FragPos);
     vec3 reflectDir = reflect(-lightDir, norm); 
-    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32); // 32 is the shininess value of our specular highlight
-    vec3 specular = specularStrength * spec * lightColor;  
+
+    lightDir   = normalize(lightPos - FragPos);
+    viewDir    = normalize(viewPos - FragPos);
+    vec3 halfwayDir = normalize(lightDir + viewDir);
+    float spec = pow(max(dot(Normal, halfwayDir), 0.0), 2); // 32 is the shininess value of our specular highlight
+    vec3 specular = lightColor * spec * specularStrength;
 
     // result
     vec3 result = (ambient + diffuse + specular) * vec3(texColor);
