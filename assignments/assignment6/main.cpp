@@ -151,10 +151,9 @@ int main() {
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 	meshSystem::MeshData cubeMeshData;
-	meshSystem::generateCube(5.0f, &cubeMeshData);
+	meshSystem::generatePlane(5.0f,5.0f,32, &cubeMeshData);
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
-	Transform cubeTransform;
-	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh,cubeTransform,&cubeShader);
+	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh,Transform(),&cubeShader);
 
 
 	unsigned int VAO;
@@ -181,6 +180,8 @@ int main() {
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 5));
 	// same as above.
 	glEnableVertexAttribArray(2);
+
+	//glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
 	glm::vec3 cubes[CUBE_COUNT][3];
 	for (int i = 0; i < CUBE_COUNT; i++)
@@ -277,7 +278,6 @@ int main() {
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		bigCube.transform.position += glm::vec3(0.1f,0.0f,0.0f);
 		bigCube.modelAndDraw();
 		lightShader.use();
 

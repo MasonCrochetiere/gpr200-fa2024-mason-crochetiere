@@ -16,8 +16,8 @@ namespace meshSystem
     struct Vertex
     {
         glm::vec3 position = glm::vec3(0);
-        glm::vec3 normal = glm::vec3(0);
         glm::vec2 uv = glm::vec2(0);
+        glm::vec3 normal = glm::vec3(0);
         Vertex(){}
         Vertex(const glm::vec3& position,const glm::vec3& normal,const glm::vec2& uv):position(position),normal(normal),uv(uv){}
 
