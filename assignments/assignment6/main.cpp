@@ -131,6 +131,12 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	Texture2D texture("assets/cube.png", 0, 0);
+	Texture2D skyBoxMap("assets/skybox.jpg", 0, 0);
+	
+
+
+
+
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
 
@@ -179,6 +185,9 @@ int main() {
 		cubes[i][2].z = RandomRange(0.1, 1.5);
 		
 	}
+
+	glm::vec3 skyBox(0.0, 0.0, 0.0);
+	glm::vec3 skyBoxSize(100.f, 100.f, 100.f);
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -258,6 +267,18 @@ int main() {
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
+
+		//glActiveTexture(GL_TEXTURE1);
+		//glBindTexture(GL_TEXTURE_2D, skyBoxMap.getID());
+		skyBoxMap.Bind(GL_TEXTURE0);
+
+		glm::mat4 skyBoxModel = glm::mat4(1.0f);
+		skyBoxModel = glm::translate(skyBoxModel, skyBox);
+		float skySpin = 25.0f * timeValue;
+		//skyBoxModel = glm::rotate(skyBoxModel, glm::radians(skySpin), skyBoxSize);
+		skyBoxModel = glm::scale(skyBoxModel, skyBoxSize);
+		cubeShader.setMat4("model", skyBoxModel);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		lightShader.use();
 
