@@ -1,6 +1,4 @@
-//
-// Created by Reece on 11/7/2024.
-//
+//written by Reece
 
 #ifndef MESHRENDERER_H
 #define MESHRENDERER_H

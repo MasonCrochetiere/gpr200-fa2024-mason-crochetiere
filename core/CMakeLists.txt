@@ -18,8 +18,8 @@ set(CORE_INC_DIR
 add_library(core STATIC ${CORE_SRC} ${CORE_INC} "macroLib/shader.h" "macroLib/shader.cpp" "macroLib/texture2D.h" "macroLib/camera.cpp" "macroLib/camera.h"
         MeshSystem/mesh.cpp
         MeshSystem/mesh.h
-        MeshSystem/shapeGenerator.cpp
-        MeshSystem/shapeGenerator.h
+        MeshSystem/meshGenerator.cpp
+        MeshSystem/meshGenerator.h
         MeshSystem/MeshRenderer.cpp
         MeshSystem/MeshRenderer.h)
 

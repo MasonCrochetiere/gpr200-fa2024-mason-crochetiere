@@ -1,6 +1,6 @@
 //written by Reece but nearly copied from procGen example file, so credit to eric winebrenner
 
-#include "shapeGenerator.h"
+#include "meshGenerator.h"
 #include <iostream>
 namespace meshSystem
 {
