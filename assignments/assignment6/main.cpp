@@ -16,8 +16,12 @@
 #include <macroLib/shader.h>
 #include <macroLib/texture2D.h>
 #include <macroLib/camera.h>
+#include <MeshSystem/mesh.h>
+#include <MeshSystem/shapeGenerator.h>
+#include <MeshSystem/MeshRenderer.h>
 using namespace ew;
 using namespace macroLib;
+using namespace meshSystem;
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
@@ -82,7 +86,7 @@ float vertices[] = {
 	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f
 };
-//aahh
+
 glm::vec3 cubePositions[] = {
 	glm::vec3(0.0f,  0.0f,  0.0f),
 	glm::vec3(2.0f,  5.0f, -15.0f),
@@ -95,6 +99,10 @@ glm::vec3 cubePositions[] = {
 	glm::vec3(1.5f,  0.2f, -1.5f),
 	glm::vec3(-1.3f,  1.0f, -1.5f)
 };
+
+
+
+
 
 unsigned int indices[] = {  // note that we start from 0!
     0, 1, 3,   // first triangle
@@ -126,6 +134,10 @@ int main() {
 
 	Camera camera(window);
 
+
+
+
+
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
@@ -137,6 +149,13 @@ int main() {
 	Shader cubeShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	Shader lightShader("assets/vertexShader.vert", "assets/lightFragmentShader.frag");
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
+
+	meshSystem::MeshData cubeMeshData;
+	meshSystem::generateCube(10.0f, &cubeMeshData);
+	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
+	Transform cubeTransform;
+	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh,cubeTransform,&cubeShader);
+
 
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
@@ -216,7 +235,7 @@ int main() {
 		cubeShader.setFloat("diffuseStrength", diffuseK);
 		cubeShader.setFloat("specularStrength", specularK);
 		cubeShader.setFloat("shininessStrength", shininess);
-		
+
 
 		texture.Bind(GL_TEXTURE0);
 
@@ -229,7 +248,7 @@ int main() {
 		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
 		model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-				
+
 		// pass projection matrix to shader (note that in this case it could change every frame)
 		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
 		cubeShader.setMat4("projection", projection);
@@ -238,7 +257,7 @@ int main() {
 		cubeShader.setFloat("uTime", timeValue);
 
 		int viewLoc = glGetUniformLocation(cubeShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+		cubeShader.setMat4("view", view);
 
 		int projectionLoc = glGetUniformLocation(cubeShader.ID, "projection");
 		cubeShader.setMat4("projection", projection);
@@ -248,23 +267,20 @@ int main() {
 		for (unsigned int i = 0; i < CUBE_COUNT; i++)
 		{
 			glm::mat4 model = glm::mat4(1.0f);
-			
+
 			model = glm::translate(model, cubes[i][0]); //  c cubePositions[i]
 			float angle = 20.0f * (i+1) * glm::sin(timeValue);
-			model = glm::rotate(model, glm::radians(angle), cubes[i][1]); // glm::vec3(1.0f, 0.3f, 0.5f)  // 
+			model = glm::rotate(model, glm::radians(angle), cubes[i][1]); // glm::vec3(1.0f, 0.3f, 0.5f)  //
 			model = glm::scale(model, cubes[i][2]);
 
 			cubeShader.setMat4("model", model);
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-
+		bigCube.modelAndDraw();
 		lightShader.use();
 
-		lightShader.setMat4("projection", projection);
 
-		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-		lightShader.setFloat("uTime", timeValue);
 		viewLoc = glGetUniformLocation(lightShader.ID, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
 		projectionLoc = glGetUniformLocation(lightShader.ID, "projection");
@@ -275,9 +291,9 @@ int main() {
 		lightShader.setMat4("model", model);
 		lightShader.setVec3("lightColor", lightColor);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
 
-		glBindVertexArray(0); 
+		glBindVertexArray(0);
 
 		// Start drawing ImGUI
 		ImGui_ImplGlfw_NewFrame();
