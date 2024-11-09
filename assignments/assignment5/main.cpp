@@ -134,8 +134,8 @@ int main() {
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
 
-	Shader cubeShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
-	Shader lightShader("assets/vertexShader.vert", "assets/lightFragmentShader.frag");
+	Shader cubeShader("assets/defaultVertex.vert", "assets/litShader.frag");
+	Shader lightShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 	unsigned int VAO;

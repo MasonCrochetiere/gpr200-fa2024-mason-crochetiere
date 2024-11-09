@@ -34,7 +34,6 @@ const float FAR_PLANE = 1000.0f;
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
 
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
 glm::vec3 lightColor(0.5f, 0.5f, 0.5f);
 
 float ambientK = 0.1f;
@@ -42,72 +41,6 @@ float diffuseK = 1.0f;
 float specularK = 0.08f;
 float shininess = 2.0f;
 
-float vertices[] = {
-	//  X      Y      Z      U     V     NX     NY     NZ
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f
-};
-
-glm::vec3 cubePositions[] = {
-	glm::vec3(0.0f,  0.0f,  0.0f),
-	glm::vec3(2.0f,  5.0f, -15.0f),
-	glm::vec3(-1.5f, -2.2f, -2.5f),
-	glm::vec3(-3.8f, -2.0f, -12.3f),
-	glm::vec3(2.4f, -0.4f, -3.5f),
-	glm::vec3(-1.7f,  3.0f, -7.5f),
-	glm::vec3(1.3f, -2.0f, -2.5f),
-	glm::vec3(1.5f,  2.0f, -2.5f),
-	glm::vec3(1.5f,  0.2f, -1.5f),
-	glm::vec3(-1.3f,  1.0f, -1.5f)
-};
-
-
-
-
-
-unsigned int indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
-};
 
 int main() {
 	printf("Initializing...");
@@ -134,10 +67,6 @@ int main() {
 	}
 
 
-
-
-
-
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
@@ -146,59 +75,19 @@ int main() {
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
 
-	Shader cubeShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
-	Shader lightShader("assets/vertexShader.vert", "assets/lightFragmentShader.frag");
-	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
+	Shader litShader("assets/defaultVertex.vert", "assets/litShader.frag");
+	Shader unlitShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
 
+	meshSystem::MeshData planeMeshData;
 	meshSystem::MeshData cubeMeshData;
-	meshSystem::generatePlane(5.0f,5.0f,32, &cubeMeshData);
+	meshSystem::generatePlane(5.0f,5.0f,32, &planeMeshData);
+	meshSystem::generateCube(1.0f,&cubeMeshData);
+	meshSystem::Mesh planeMesh = meshSystem::Mesh(planeMeshData);
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
-	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh,Transform(),&cubeShader);
+	meshSystem::MeshRenderer bigPlane = MeshRenderer(planeMesh,Transform(),&litShader);
+	meshSystem::MeshRenderer lightCube = MeshRenderer(cubeMesh,Transform(),&unlitShader);
 
 
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	//Initialization goes here!
-	unsigned int VBO;
-	glGenBuffers(1, &VBO); // populates VBO with the next available buffer indicator
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); // sets the buffer to mess with to be VBO
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // so this transfers vertex data from CPU to GPU?
-
-	// position (getting XYZ)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	// telling GPU when to jump in data (how many bytes slash floats) to get to each vertex
-	glEnableVertexAttribArray(0);
-
-	// color (getting RGBA)
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3));
-	// same as above function. the final parameter is the offset (in bytes) to retrieve the data
-	glEnableVertexAttribArray(1);
-
-	// setting Normals
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 5));
-	// same as above.
-	glEnableVertexAttribArray(2);
-
-	//glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-
-	glm::vec3 cubes[CUBE_COUNT][3];
-	for (int i = 0; i < CUBE_COUNT; i++)
-	{
-		cubes[i][0].x = RandomRange(-4, 4);
-		cubes[i][0].y = RandomRange(-4, 4);
-		cubes[i][0].z = RandomRange(-0.5, -10);
-
-		cubes[i][1].x = RandomRange(0.5, 4);
-		cubes[i][1].y = RandomRange(0.5, 4);
-		cubes[i][1].z = RandomRange(0.5, 4);
-
-		cubes[i][2].x = RandomRange(0.1, 1.5);
-		cubes[i][2].y = RandomRange(0.1, 1.5);
-		cubes[i][2].z = RandomRange(0.1, 1.5);
-
-	}
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -226,75 +115,45 @@ int main() {
 		float timeValue = glfwGetTime();
 
 		// be sure to activate the shader
-		cubeShader.use();
-
-		cubeShader.setVec3("lightPos", lightPos);
-		cubeShader.setVec3("lightColor", lightColor);
-		cubeShader.setVec3("viewPos", camera.getCameraPos());
-
-		cubeShader.setFloat("ambientStrength", ambientK);
-		cubeShader.setFloat("diffuseStrength", diffuseK);
-		cubeShader.setFloat("specularStrength", specularK);
-		cubeShader.setFloat("shininessStrength", shininess);
-
+		litShader.use();
+		litShader.setVec3("pointLights[0].position", lightCube.transform.position + glm::vec3(0.5f) * lightCube.transform.scale);
+		//litShader.setVec3("lightColor", lightColor);
+		litShader.setVec3("viewPos", camera.getCameraPos());
+		litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+		litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+		litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+		litShader.setFloat("material.shininess", 32.0f);
+		glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f); // decrease the influence
+		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
+		litShader.setVec3("pointLights[0].ambient", ambientColor);
+		litShader.setVec3("pointLights[0].diffuse", diffuseColor);
+		litShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		litShader.setFloat("pointLights[0].constant",  1.0f);
+		litShader.setFloat("pointLights[0].linear",    0.09f);
+		litShader.setFloat("pointLights[0].quadratic", 0.032f);
+		//litShader.setFloat("pointLights[0].innerCutOff", glm::cos(glm::radians(10.0f)));
+		//litShader.setFloat("pointLights[0].outerCutOff", glm::cos(glm::radians(25.0f)));
+		//litShader.setVec3("pointLights[0].direction", camera.getCameraFront());
 
 		texture.Bind(GL_TEXTURE0);
 
-		glm::mat4 model = glm::mat4(1.0f);
+
+		//calculate and set view and projection
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
-
-		// note that we're translating the scene in the reverse direction of where we want to move
 		view = glm::lookAt(camera.getCameraPos(), camera.getCameraPos() + camera.getCameraFront(), camera.getCameraUp());
-		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-		model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
-		// pass projection matrix to shader (note that in this case it could change every frame)
 		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
-		cubeShader.setMat4("projection", projection);
+		litShader.setMat4("view", view);
+		litShader.setMat4("projection", projection);
 
-		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-		cubeShader.setFloat("uTime", timeValue);
+		unlitShader.use();
+		unlitShader.setMat4("view", view);
+		unlitShader.setMat4("projection", projection);
+		unlitShader.setVec3("color",glm::vec3(1.0f, 1.0f, 1.0f));
 
-		int viewLoc = glGetUniformLocation(cubeShader.ID, "view");
-		cubeShader.setMat4("view", view);
+		bigPlane.modelAndDraw();
+		lightCube.modelAndDraw();
 
-		int projectionLoc = glGetUniformLocation(cubeShader.ID, "projection");
-		cubeShader.setMat4("projection", projection);
-		// same for View Matrix and Projection Matrix
-
-		glBindVertexArray(VAO);
-		for (unsigned int i = 0; i < CUBE_COUNT; i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
-
-			model = glm::translate(model, cubes[i][0]); //  c cubePositions[i]
-			float angle = 20.0f * (i+1) * glm::sin(timeValue);
-			model = glm::rotate(model, glm::radians(angle), cubes[i][1]); // glm::vec3(1.0f, 0.3f, 0.5f)  //
-			model = glm::scale(model, cubes[i][2]);
-
-			cubeShader.setMat4("model", model);
-
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
-		bigCube.modelAndDraw();
-		lightShader.use();
-
-
-		viewLoc = glGetUniformLocation(lightShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-		projectionLoc = glGetUniformLocation(lightShader.ID, "projection");
-		lightShader.setMat4("projection", projection);
-
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
-		lightShader.setMat4("model", model);
-		lightShader.setVec3("lightColor", lightColor);
-
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
-
-		glBindVertexArray(0);
 
 		// Start drawing ImGUI
 		ImGui_ImplGlfw_NewFrame();
@@ -305,7 +164,7 @@ int main() {
 		ImGui::Begin("Settings");
 		ImGui::Text("Add Controls Here!");
 
-		ImGui::DragFloat3("Light Position", &lightPos.x, 0.1f);
+		ImGui::DragFloat3("Light Position", &lightCube.transform.position.x, 0.1f);
 		ImGui::ColorEdit3("Light Color", &lightColor.r);
 		ImGui::SliderFloat("Ambient K", &ambientK, 0.0f, 1.0f);
 		ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);

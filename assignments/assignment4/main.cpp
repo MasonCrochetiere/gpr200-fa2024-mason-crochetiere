@@ -116,7 +116,7 @@ int main() {
 	Texture2D texture1("assets/brickTexture.png", 0, 0);
 	Texture2D texture2("assets/awesomeface.png", 0, 0);
 
-	Shader charShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	Shader charShader("assets/defaultVertex.vert", "assets/litShader.frag");
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 	unsigned int VAO;
