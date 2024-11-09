@@ -27,13 +27,14 @@ namespace meshSystem {
             glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(const void*)offsetof(Vertex,position));
             glEnableVertexAttribArray(0);
 
-            //Setup Normal Buffer
-            glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(const void*)offsetof(Vertex,normal));
+            //Setup UV Buffer
+            glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(const void*)offsetof(Vertex,uv));
             glEnableVertexAttribArray(1);
 
-            //Setup UV Buffer
-            glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(const void*)offsetof(Vertex,uv));
+            //Setup Normal Buffer
+            glVertexAttribPointer(2,3,GL_FLOAT,GL_FALSE,sizeof(Vertex),(const void*)offsetof(Vertex,normal));
             glEnableVertexAttribArray(2);
+
 
             meshInitialized = true;
         }

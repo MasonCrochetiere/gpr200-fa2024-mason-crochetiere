@@ -1,6 +1,6 @@
 //written by Reece but nearly copied from procGen example file, so credit to eric winebrenner
 
-#include "shapeGenerator.h"
+#include "meshGenerator.h"
 #include <iostream>
 namespace meshSystem
 {
@@ -78,9 +78,9 @@ namespace meshSystem
         }
 
         //set indices
-        for(size_t row = 0;row <= subDivisions;row++)
+        for(size_t row = 0;row < subDivisions;row++)
         {
-            for(size_t col = 0;col <= subDivisions;col++)
+            for(size_t col = 0;col < subDivisions;col++)
             {
                 unsigned int bottomLeft = row * (subDivisions + 1) + col;
                 unsigned int bottomRight = bottomLeft + 1;

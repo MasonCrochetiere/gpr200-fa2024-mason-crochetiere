@@ -17,7 +17,7 @@
 #include <macroLib/texture2D.h>
 #include <macroLib/camera.h>
 #include <MeshSystem/mesh.h>
-#include <MeshSystem/shapeGenerator.h>
+#include <MeshSystem/meshGenerator.h>
 #include <MeshSystem/MeshRenderer.h>
 using namespace ew;
 using namespace macroLib;
@@ -121,6 +121,7 @@ int main() {
 		return 1;
 	}
 	glfwMakeContextCurrent(window);
+	Camera camera(window);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
@@ -132,7 +133,6 @@ int main() {
 		return 1;
 	}
 
-	Camera camera(window);
 
 
 
@@ -151,10 +151,9 @@ int main() {
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 	meshSystem::MeshData cubeMeshData;
-	meshSystem::generateCube(10.0f, &cubeMeshData);
+	meshSystem::generatePlane(5.0f,5.0f,32, &cubeMeshData);
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
-	Transform cubeTransform;
-	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh,cubeTransform,&cubeShader);
+	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh,Transform(),&cubeShader);
 
 
 	unsigned int VAO;
@@ -168,12 +167,12 @@ int main() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // so this transfers vertex data from CPU to GPU?
 
 	// position (getting XYZ)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); 
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	// telling GPU when to jump in data (how many bytes slash floats) to get to each vertex
 	glEnableVertexAttribArray(0);
 
 	// color (getting RGBA)
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3)); 
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3));
 	// same as above function. the final parameter is the offset (in bytes) to retrieve the data
 	glEnableVertexAttribArray(1);
 
@@ -181,6 +180,8 @@ int main() {
 	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 5));
 	// same as above.
 	glEnableVertexAttribArray(2);
+
+	//glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
 	glm::vec3 cubes[CUBE_COUNT][3];
 	for (int i = 0; i < CUBE_COUNT; i++)
@@ -196,7 +197,7 @@ int main() {
 		cubes[i][2].x = RandomRange(0.1, 1.5);
 		cubes[i][2].y = RandomRange(0.1, 1.5);
 		cubes[i][2].z = RandomRange(0.1, 1.5);
-		
+
 	}
 
 	//Render loop
@@ -242,7 +243,7 @@ int main() {
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
-	
+
 		// note that we're translating the scene in the reverse direction of where we want to move
 		view = glm::lookAt(camera.getCameraPos(), camera.getCameraPos() + camera.getCameraFront(), camera.getCameraUp());
 		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
