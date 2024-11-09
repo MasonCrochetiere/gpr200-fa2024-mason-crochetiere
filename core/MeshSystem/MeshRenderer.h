@@ -24,6 +24,7 @@ namespace meshSystem {
         MeshRenderer();
         MeshRenderer(meshSystem::Mesh newMesh, macroLib::Shader *newShader);
         MeshRenderer(meshSystem::Mesh newMesh,Transform newTransform, macroLib::Shader *newShader);
+        ~MeshRenderer();
         void modelAndDraw();
         Transform transform;
     private:

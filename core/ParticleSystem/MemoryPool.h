@@ -1,0 +1,39 @@
+// Okay
+// So
+// I grabbed this memory pool code in its entirety from my final project for Game Architecture
+// Will Mansfield made it
+// I figured snagging this now is just advantageous later
+
+#pragma once
+
+#include "../DeanLib/include/DeanLibDefines.h"
+#include "../DeanLib/include/CircularQueue.h"
+#include "../DeanLib/include/Trackable.h"
+
+
+class MemoryPool : public Trackable
+{
+public:
+	MemoryPool(unsigned int maxNumObjects, unsigned int objectSize);
+	~MemoryPool() { free(mMemory); delete mpFreeList; };
+
+	void reset();//doesn't reallocate memory but does reset free list and num allocated objects
+
+	Byte* allocateObject();
+	void freeObject(Byte* ptr);
+
+	inline Uint32 getMaxObjectSize() { return mObjectSize; };
+	inline Uint32 getNumFreeObjects() { return mMaxNumObjects - mNumAllocatedObjects; };
+
+	bool contains(Byte* ptr) const;
+
+private:
+	Byte* mMemory;
+	Byte* mHighestValidAddress;
+	Uint32 mMaxNumObjects;
+	Uint32 mNumAllocatedObjects;
+	Uint32 mObjectSize;
+	CircularQueue<Byte*>* mpFreeList;
+
+	void createFreeList();
+};
