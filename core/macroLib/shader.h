@@ -21,6 +21,7 @@ namespace macroLib
 
         // constructor reads and builds the shader
         Shader(const char* vertexPath, const char* fragmentPath);
+        Shader(Shader& copy);
         // use/activate the shader
         void use();
         // utility uniform functions

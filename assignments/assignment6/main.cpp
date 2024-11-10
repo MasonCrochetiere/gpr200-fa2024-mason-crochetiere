@@ -170,7 +170,7 @@ int main() {
 		//MemoryPool particlePool(32, sizeof(meshSystem::MeshRenderer));
 		//std::vector<MeshRenderer*> particleVec;
 
-		ParticleSystem particleSystem(32);
+		ParticleSystem particleSystem(32, &cubeShader, cubeMesh);
 
 		unsigned int VAO;
 		glGenVertexArrays(1, &VAO);

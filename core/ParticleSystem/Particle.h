@@ -12,7 +12,7 @@
 class Particle : public Trackable
 {
 public:
-	Particle(Mesh particleMesh, Shader particleShader, float sTime);
+	Particle(Mesh particleMesh, Shader &particleShader, float sTime);
 	~Particle();
 
 	void renderParticle();

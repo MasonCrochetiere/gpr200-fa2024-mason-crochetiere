@@ -14,7 +14,7 @@
 class ParticleSystem : public Trackable
 {
 public:
-	ParticleSystem(int poolSize);
+	ParticleSystem(int poolSize, Shader* newShader, Mesh mMesh);
 	~ParticleSystem();
 
 	void updateSystem(float currentTime, float deltaTime);
@@ -27,7 +27,7 @@ private:
 	std::vector<Particle*> particleVec;
 
 	meshSystem::Mesh particleMesh;
-	macroLib::Shader particleShader;
+	macroLib::Shader* particleShader;
 
 	float lastParticleSpawn = 0.0f;
 

@@ -1,13 +1,15 @@
 #include "ParticleSystem.h"
 using namespace std;
 
-ParticleSystem::ParticleSystem(int poolSize)
-	:particlePool(poolSize, sizeof(Particle)), particleShader("assets/vertexShader.vert", "assets/fragmentShader.frag")
+ParticleSystem::ParticleSystem(int poolSize, Shader* mShader, Mesh mMesh)
+	:particlePool(poolSize, sizeof(Particle)), particleShader(mShader), particleMesh(mMesh)
 {
-	meshSystem::MeshData cubeMeshData;
-	//meshSystem::generatePlane(5.0f, 5.0f, 32, &cubeMeshData);
-	meshSystem::generateCube(1.0f, &cubeMeshData);
-	particleMesh = meshSystem::Mesh(cubeMeshData);
+	particleShader = mShader;
+	particleMesh = mMesh;
+	//meshSystem::MeshData cubeMeshData;
+	////meshSystem::generatePlane(5.0f, 5.0f, 32, &cubeMeshData);
+	//meshSystem::generateCube(1.0f, &cubeMeshData);
+	//particleMesh = meshSystem::Mesh(cubeMeshData);
 }
 
 ParticleSystem::~ParticleSystem()
@@ -49,7 +51,7 @@ void ParticleSystem::addParticle(float sTime)
 	if (ptr != NULL)
 	{
 		//std::cout << "MAKING A UNIT" << endl;
-		Particle* pParticle = new (ptr)Particle(particleMesh, particleShader, sTime);
+		Particle* pParticle = new (ptr)Particle(particleMesh, *particleShader, sTime);
 
 		particleVec.push_back(pParticle);
 		//pFireBall->mPooledObject = true;
