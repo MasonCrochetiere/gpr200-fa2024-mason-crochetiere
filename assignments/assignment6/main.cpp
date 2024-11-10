@@ -21,6 +21,8 @@
 #include <MeshSystem/MeshRenderer.h>
 
 #include <ParticleSystem/MemoryPool.h>
+#include <ParticleSystem/ParticleSystem.h>
+
 #include <DeanLib/include/PerformanceTracker.h>
 #include <DeanLib/include/MemoryTracker.h>
 
@@ -164,9 +166,11 @@ int main() {
 		meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
 		meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &cubeShader);
 
-		int poolSize = 32;
-		MemoryPool particlePool(32, sizeof(meshSystem::MeshRenderer));
-		std::vector<MeshRenderer*> particleVec;
+		//int poolSize = 32;
+		//MemoryPool particlePool(32, sizeof(meshSystem::MeshRenderer));
+		//std::vector<MeshRenderer*> particleVec;
+
+		ParticleSystem particleSystem(32);
 
 		unsigned int VAO;
 		glGenVertexArrays(1, &VAO);
@@ -195,55 +199,34 @@ int main() {
 
 		//glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
 
-		for (int i = 0; i < CUBE_COUNT; i++)
-		{
-			Byte* ptr = particlePool.allocateObject();
-			if (ptr != NULL)
-			{
-				//std::cout << "MAKING A UNIT" << endl;
-				MeshRenderer* pRenderer = new (ptr)MeshRenderer(cubeMesh, Transform(), &cubeShader);
-
-				pRenderer->transform.position.x = RandomRange(-4, 4);
-				pRenderer->transform.position.y = RandomRange(-4, 4);
-				pRenderer->transform.position.z = RandomRange(-0.5, -10);
-
-				pRenderer->transform.rotation.x = RandomRange(0.5, 4);
-				pRenderer->transform.rotation.y = RandomRange(0.5, 4);
-				pRenderer->transform.rotation.z = RandomRange(0.5, 4);
-
-				pRenderer->transform.scale.x = RandomRange(0.1, 1.5);
-				pRenderer->transform.scale.y = RandomRange(0.1, 1.5);
-				pRenderer->transform.scale.z = RandomRange(0.1, 1.5);
-
-				particleVec.push_back(pRenderer);
-				//pFireBall->mPooledObject = true;
-			}
-		}
-
 		//Render loop
 		while (!glfwWindowShouldClose(window)) {
 			glfwPollEvents();
 
+			// ---------------------------------- UPDATE TIME------------------------------------------\\
+			
 			// per-frame time logic
+			float timeValue = glfwGetTime();
+
 			float currentFrame = static_cast<float>(glfwGetTime());
 			deltaTime = currentFrame - lastFrame;
 			lastFrame = currentFrame;
 
 			camera.updateTime(deltaTime);
 
-			// input
+			// -------------------------------------GET INPUT------------------------------------------\\
+
 			camera.processInput(window);
+
+			// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
+
+			particleSystem.updateSystem(timeValue, deltaTime);
+
+			// ---------RENDER LOGIC (So most of it because graphics programming LOL)------------------\\
 
 			//Clear framebuffer
 			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
-
-			//glActiveTexture(GL_TEXTURE0);
-			//glBindTexture(GL_TEXTURE_2D, texture1.getID());
-			//glActiveTexture(GL_TEXTURE1);
-			//glBindTexture(GL_TEXTURE_2D, texture2.getID());
-
-			float timeValue = glfwGetTime();
 
 			// be sure to activate the shader
 			cubeShader.use();
@@ -256,7 +239,6 @@ int main() {
 			cubeShader.setFloat("diffuseStrength", diffuseK);
 			cubeShader.setFloat("specularStrength", specularK);
 			cubeShader.setFloat("shininessStrength", shininess);
-
 
 			texture.Bind(GL_TEXTURE0);
 
@@ -285,28 +267,9 @@ int main() {
 			// same for View Matrix and Projection Matrix
 
 			glBindVertexArray(VAO);
-			//for (unsigned int i = 0; i < CUBE_COUNT; i++)
-			//{
-			//	glm::mat4 model = glm::mat4(1.0f);
-
-			//	model = glm::translate(model, cubes[i][0]); //  c cubePositions[i]
-			//	float angle = 20.0f * (i + 1) * glm::sin(timeValue);
-			//	model = glm::rotate(model, glm::radians(angle), cubes[i][1]); // glm::vec3(1.0f, 0.3f, 0.5f)  //
-			//	model = glm::scale(model, cubes[i][2]);
-
-			//	cubeShader.setMat4("model", model);
-
-			//	glDrawArrays(GL_TRIANGLES, 0, 36);
-			//}
 			bigCube.modelAndDraw();
 
-			for (unsigned int i = 0; i < particleVec.size(); i++)
-			{
-				MeshRenderer* pTarget = particleVec.at(i);
-				pTarget->transform.rotation.z = glm::radians(20.0f * (i + 1) * glm::sin(timeValue));
-				pTarget->modelAndDraw();
-				// std::vector<MeshRenderer*> particleVec;
-			}
+			particleSystem.renderSystem();
 
 			lightShader.use();
 
@@ -351,17 +314,17 @@ int main() {
 			glfwSwapBuffers(window);
 		}
 
-		for (unsigned int i = 0; i < particleVec.size(); i++)
-		{
-			MeshRenderer* target = (MeshRenderer*)particleVec.at(i);
+		//for (unsigned int i = 0; i < particleVec.size(); i++)
+		//{
+		//	MeshRenderer* target = (MeshRenderer*)particleVec.at(i);
 
-			target->~MeshRenderer();
-			particlePool.freeObject((Byte*)target);
+		//	target->~MeshRenderer();
+		//	particlePool.freeObject((Byte*)target);
 
-		}
-		particleVec.clear();
+		//}
+		//particleVec.clear();
 
-		std::cout << "Pooled objects " << particlePool.getNumFreeObjects() << std::endl;
+		//std::cout << "Pooled objects " << particlePool.getNumFreeObjects() << std::endl;
 	} // so this set of brackets exists to put the project all in one scope
 	// that way any instanced objects are deleted at the end
 	// which means that checking for memory leaks:tm: works just fine.
