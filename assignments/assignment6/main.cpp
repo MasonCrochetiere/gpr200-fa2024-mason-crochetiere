@@ -19,9 +19,12 @@
 #include <MeshSystem/mesh.h>
 #include <MeshSystem/meshGenerator.h>
 #include <MeshSystem/MeshRenderer.h>
+
+#include "Lighting/LightingSystem.h"
 using namespace ew;
 using namespace macroLib;
 using namespace meshSystem;
+using namespace lightSystem;
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
@@ -78,6 +81,12 @@ int main() {
 	Shader litShader("assets/defaultVertex.vert", "assets/litShader.frag");
 	Shader unlitShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
 
+	lightSystem::LightingSystem lightSystem = LightingSystem(&litShader);
+	lightSystem::PointLight cubeLight = PointLight();
+	lightSystem::PointLight cubeLight1 = PointLight();
+	lightSystem.AddPointLight(&cubeLight);
+	lightSystem.AddPointLight(&cubeLight1);
+
 	meshSystem::MeshData planeMeshData;
 	meshSystem::MeshData cubeMeshData;
 	meshSystem::generatePlane(5.0f,5.0f,32, &planeMeshData);
@@ -86,6 +95,7 @@ int main() {
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
 	meshSystem::MeshRenderer bigPlane = MeshRenderer(planeMesh,Transform(),&litShader);
 	meshSystem::MeshRenderer lightCube = MeshRenderer(cubeMesh,Transform(),&unlitShader);
+	meshSystem::MeshRenderer lightCube1 = MeshRenderer(cubeMesh,Transform(),&unlitShader);
 
 
 
@@ -116,7 +126,9 @@ int main() {
 
 		// be sure to activate the shader
 		litShader.use();
-		litShader.setVec3("pointLights[0].position", lightCube.transform.position + glm::vec3(0.5f) * lightCube.transform.scale);
+		cubeLight.position = lightCube.transform.position + glm::vec3(0.5f) * lightCube.transform.scale;
+		lightSystem.UpdateLighting(camera.getCameraPos());
+		//litShader.setVec3("pointLights[0].position", lightCube.transform.position + glm::vec3(0.5f) * lightCube.transform.scale);
 		//litShader.setVec3("lightColor", lightColor);
 		litShader.setVec3("viewPos", camera.getCameraPos());
 		litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
@@ -125,12 +137,12 @@ int main() {
 		litShader.setFloat("material.shininess", 32.0f);
 		glm::vec3 diffuseColor = lightColor   * glm::vec3(0.5f); // decrease the influence
 		glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
-		litShader.setVec3("pointLights[0].ambient", ambientColor);
-		litShader.setVec3("pointLights[0].diffuse", diffuseColor);
-		litShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
-		litShader.setFloat("pointLights[0].constant",  1.0f);
-		litShader.setFloat("pointLights[0].linear",    0.09f);
-		litShader.setFloat("pointLights[0].quadratic", 0.032f);
+		//litShader.setVec3("pointLights[0].ambient", ambientColor);
+		//litShader.setVec3("pointLights[0].diffuse", diffuseColor);
+		//litShader.setVec3("pointLights[0].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+		//litShader.setFloat("pointLights[0].constant",  1.0f);
+		//litShader.setFloat("pointLights[0].linear",    0.09f);
+		//litShader.setFloat("pointLights[0].quadratic", 0.032f);
 		//litShader.setFloat("pointLights[0].innerCutOff", glm::cos(glm::radians(10.0f)));
 		//litShader.setFloat("pointLights[0].outerCutOff", glm::cos(glm::radians(25.0f)));
 		//litShader.setVec3("pointLights[0].direction", camera.getCameraFront());
@@ -153,6 +165,7 @@ int main() {
 
 		bigPlane.modelAndDraw();
 		lightCube.modelAndDraw();
+		lightCube1.modelAndDraw();
 
 
 		// Start drawing ImGUI
@@ -165,11 +178,14 @@ int main() {
 		ImGui::Text("Add Controls Here!");
 
 		ImGui::DragFloat3("Light Position", &lightCube.transform.position.x, 0.1f);
-		ImGui::ColorEdit3("Light Color", &lightColor.r);
-		ImGui::SliderFloat("Ambient K", &ambientK, 0.0f, 1.0f);
-		ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);
-		ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
-		ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
+		ImGui::DragFloat3("Light Position1", &lightCube1.transform.position.x, 0.1f);
+		ImGui::ColorEdit3("Light Color", &cubeLight.color.r);
+		ImGui::SliderFloat("Ambient K", &cubeLight.ambient, 0.0f, 1.0f);
+		ImGui::SliderFloat("Diffuse K", &cubeLight.diffuse, 0.0f, 1.0f);
+		ImGui::SliderFloat("Specular K", &cubeLight.specular, 0.0f, 1.0f);
+		ImGui::SliderFloat("Ambient1 K", &cubeLight1.ambient, 0.0f, 1.0f);
+		ImGui::SliderFloat("Diffuse1 K", &cubeLight1.diffuse, 0.0f, 1.0f);
+		ImGui::SliderFloat("Specular1 K", &cubeLight1.specular, 0.0f, 1.0f);
 
 		ImGui::End();
 

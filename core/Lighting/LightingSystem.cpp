@@ -2,9 +2,12 @@
 
 #include "LightingSystem.h"
 
-namespace lightSysten {
+namespace lightSystem {
     LightingSystem::LightingSystem(macroLib::Shader *shader) {
         this->shader = shader;
+        directionLights = std::vector<DirectionLight*>();
+        pointLights = std::vector<PointLight*>();
+        spotLights = std::vector<SpotLight*>();
     }
     void LightingSystem::UpdateLighting(glm::vec3 viewPos)
     {
@@ -17,11 +20,10 @@ namespace lightSysten {
         for(int i = 0;i < directionLights.size();i++)
         {
             string directionString = directionStringStart + std::to_string(i);
-            glm::vec3 diffuseColor = directionLights[i]->color * glm::vec3(0.5f); // decrease the influence
-            glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
-            shader->setVec3(directionString + "].ambient", ambientColor);
-            shader->setVec3(directionString + "].diffuse", diffuseColor);
-            shader->setVec3(directionString + "].specular", directionLights[i]->specular);
+            shader->setVec3(directionString + "].color", directionLights[i]->color);
+            shader->setFloat(directionString + "].ambient", directionLights[i]->ambient);
+            shader->setFloat(directionString + "].diffuse", directionLights[i]->diffuse);
+            shader->setFloat(directionString + "].specular", directionLights[i]->specular);
             shader->setVec3(directionString + "].direction", directionLights[i]->direction);
         }
 
@@ -31,11 +33,11 @@ namespace lightSysten {
         for(int i = 0;i < pointLights.size();i++)
         {
             string pointString = pointStringStart + std::to_string(i);
-            glm::vec3 diffuseColor = pointLights[i]->color * glm::vec3(0.5f); // decrease the influence
-            glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
-            shader->setVec3(pointString + "].ambient", ambientColor);
-            shader->setVec3(pointString + "].diffuse", diffuseColor);
-            shader->setVec3(pointString + "].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+            shader->setVec3(pointString + "].color", pointLights[i]->color);
+            shader->setVec3(pointString + "].position", pointLights[i]->position);
+            shader->setFloat(pointString + "].ambient", pointLights[i]->ambient);
+            shader->setFloat(pointString + "].diffuse", pointLights[i]->diffuse);
+            shader->setFloat(pointString + "].specular", pointLights[i]->specular);
             shader->setFloat(pointString + "].constant",  pointLights[i]->constant);
             shader->setFloat(pointString + "].linear",    pointLights[i]->linear);
             shader->setFloat(pointString + "].quadratic", pointLights[i]->quadratic);
@@ -47,11 +49,10 @@ namespace lightSysten {
         for(int i = 0;i < spotLights.size();i++)
         {
             string spotString = spotStringStart + std::to_string(i);
-            glm::vec3 diffuseColor = spotLights[i]->color * glm::vec3(0.5f); // decrease the influence
-            glm::vec3 ambientColor = diffuseColor * glm::vec3(0.2f); // low influence
-            shader->setVec3(spotString + "].ambient", ambientColor);
-            shader->setVec3(spotString + "].diffuse", diffuseColor);
-            shader->setVec3(spotString + "].specular", glm::vec3(1.0f, 1.0f, 1.0f));
+            shader->setVec3(spotString + "].color", spotLights[i]->color);
+            shader->setFloat(spotString + "].ambient", spotLights[i]->ambient);
+            shader->setFloat(spotString + "].diffuse", spotLights[i]->diffuse);
+            shader->setFloat(spotString + "].specular", spotLights[i]->specular);
             shader->setFloat(spotString + "].constant",  spotLights[i]->constant);
             shader->setFloat(spotString + "].linear",    spotLights[i]->linear);
             shader->setFloat(spotString + "].quadratic", spotLights[i]->quadratic);
