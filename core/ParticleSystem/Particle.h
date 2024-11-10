@@ -17,6 +17,8 @@ public:
 
 	void renderParticle();
 
+	float getStartTime() { return startTime; }
+
 private:
 	meshSystem::MeshRenderer* pRenderer;
 	float startTime = 0;

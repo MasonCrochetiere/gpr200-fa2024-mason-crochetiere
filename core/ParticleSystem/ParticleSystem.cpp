@@ -34,6 +34,25 @@ void ParticleSystem::updateSystem(float currentTime, float deltaTime)
 		addParticle(currentTime);
 		lastParticleSpawn = currentTime;
 	}
+
+	for (unsigned int i = 0; i < particleVec.size(); i++)
+	{
+		if (currentTime - particleVec.at(i)->getStartTime() >= particleLifetime)
+		{
+			particlesToDestroyVec.push_back(particleVec.at(i));
+		}
+	}
+
+	destroyQueuedParticles();
+}
+
+void ParticleSystem::destroyQueuedParticles()
+{
+	for (unsigned int i = 0; i < particlesToDestroyVec.size(); i++)
+	{
+		removeParticle(particlesToDestroyVec.at(i));
+	}
+	particlesToDestroyVec.clear();
 }
 
 void ParticleSystem::renderSystem()
