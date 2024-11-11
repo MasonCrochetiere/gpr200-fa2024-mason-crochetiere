@@ -11,8 +11,12 @@ namespace lightSystem {
     }
     void LightingSystem::UpdateLighting(glm::vec3 viewPos)
     {
+        //use the shader and set the amount of lights
         shader->use();
         shader->setVec3("viewPos", viewPos);
+        shader->setFloat("numDirLights", directionLights.size());
+        shader->setFloat("numPointLights", pointLights.size());
+        shader->setFloat("numSpotLights", spotLights.size());
 
 
         //Direction Lights

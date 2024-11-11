@@ -1,7 +1,7 @@
 #version 330 core
-#define MAX_DIR_LIGHTS 1
-#define MAX_POINT_LIGHTS 2
-#define MAX_SPOT_LIGHTS 1
+#define MAX_DIR_LIGHTS 8
+#define MAX_POINT_LIGHTS 8
+#define MAX_SPOT_LIGHTS 8
 out vec4 FragColor;
 // in vec4 Color;
 
@@ -56,6 +56,9 @@ struct PointLight
     float specular;
 };
 
+uniform float numDirLights;
+uniform float numPointLights;
+uniform float numSpotLights;
 vec3 CalcDirLight(DirLight light,vec3 normal,vec3 viewDir);
 vec3 CalcPointLight(PointLight light,vec3 normal,vec3 fragPos,vec3 viewDir);
 vec3 CalcSpotLight(SpotLight light,vec3 normal,vec3 fragPos,vec3 viewDir);
@@ -75,18 +78,18 @@ void main()
     vec3 result;
 
     //directional light
-    for(int i = 0;i < MAX_DIR_LIGHTS;i++)
+    for(int i = 0;i < numDirLights;i++)
     {
         result += CalcDirLight(dirLights[i],norm,viewDir);
     }
     //point lights
-    for(int i = 0;i < MAX_POINT_LIGHTS;i++)
+    for(int i = 0;i < numPointLights;i++)
     {
-        result += CalcPointLight(pointLights[0],norm,FragPos,viewDir);
+        result += CalcPointLight(pointLights[i],norm,FragPos,viewDir);
     }
-    for(int i = 0;i < MAX_SPOT_LIGHTS;i++)
+    for(int i = 0;i < numSpotLights;i++)
     {
-        //result += CalcSpotLight(spotLights[i],norm,FragPos,viewDir);
+        result += CalcSpotLight(spotLights[i],norm,FragPos,viewDir);
     }
     FragColor = vec4(result, 1.0f);
 }

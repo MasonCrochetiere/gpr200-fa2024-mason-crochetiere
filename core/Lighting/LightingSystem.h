@@ -58,6 +58,9 @@ namespace lightSystem {
         std::vector<DirectionLight*> directionLights;
         std::vector<PointLight*> pointLights;
         std::vector<SpotLight*> spotLights;
+        int numDirectionLights = 0;
+        int numPointLights = 0;
+        int numSpotLights = 0;
     };
 }
 

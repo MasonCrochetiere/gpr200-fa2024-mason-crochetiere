@@ -82,18 +82,21 @@ int main() {
 	Shader unlitShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
 
 	lightSystem::LightingSystem lightSystem = LightingSystem(&litShader);
-	lightSystem::PointLight cubeLight = PointLight();
 	lightSystem::PointLight cubeLight1 = PointLight();
-	lightSystem.AddPointLight(&cubeLight);
+	lightSystem::PointLight cubeLight = PointLight();
+	lightSystem::SpotLight flashlight = SpotLight();
 	lightSystem.AddPointLight(&cubeLight1);
+	lightSystem.AddPointLight(&cubeLight);
+	lightSystem.AddSpotLight(&flashlight);
 
 	meshSystem::MeshData planeMeshData;
 	meshSystem::MeshData cubeMeshData;
-	meshSystem::generatePlane(5.0f,5.0f,32, &planeMeshData);
+	meshSystem::generatePlane(10.0f,10.0f,32, &planeMeshData);
 	meshSystem::generateCube(1.0f,&cubeMeshData);
 	meshSystem::Mesh planeMesh = meshSystem::Mesh(planeMeshData);
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
 	meshSystem::MeshRenderer bigPlane = MeshRenderer(planeMesh,Transform(),&litShader);
+	bigPlane.transform.position = glm::vec3(-5.0f,-5.0f,0.0f);
 	meshSystem::MeshRenderer lightCube = MeshRenderer(cubeMesh,Transform(),&unlitShader);
 	meshSystem::MeshRenderer lightCube1 = MeshRenderer(cubeMesh,Transform(),&unlitShader);
 
@@ -127,6 +130,9 @@ int main() {
 		// be sure to activate the shader
 		litShader.use();
 		cubeLight.position = lightCube.transform.position + glm::vec3(0.5f) * lightCube.transform.scale;
+		cubeLight1.position = lightCube1.transform.position + glm::vec3(0.5f) * lightCube1.transform.scale;
+		flashlight.position = camera.getCameraPos();
+		flashlight.direction = camera.getCameraFront();
 		lightSystem.UpdateLighting(camera.getCameraPos());
 		//litShader.setVec3("pointLights[0].position", lightCube.transform.position + glm::vec3(0.5f) * lightCube.transform.scale);
 		//litShader.setVec3("lightColor", lightColor);
