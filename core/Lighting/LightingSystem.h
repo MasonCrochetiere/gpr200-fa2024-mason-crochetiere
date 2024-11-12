@@ -12,10 +12,10 @@ using namespace std;
 namespace lightSystem {
     struct DirectionLight {
         glm::vec3 color = glm::vec3(1.0f);
-        glm::vec3 direction = glm::vec3(0.0f,0.0f,1.0f);
+        glm::vec3 direction = glm::vec3(0.0f,0.0f,-1.0f);
         float ambient = 0.1f;
-        float diffuse = 0.5f;
-        float specular = 0.5f;
+        float diffuse = 0.3f;
+        float specular = 0.0f;
     };
     struct PointLight{
         glm::vec3 color = glm::vec3(1.0f);

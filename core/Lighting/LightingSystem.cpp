@@ -53,6 +53,7 @@ namespace lightSystem {
         for(int i = 0;i < spotLights.size();i++)
         {
             string spotString = spotStringStart + std::to_string(i);
+            shader->setVec3(spotString + "].position", spotLights[i]->position);
             shader->setVec3(spotString + "].color", spotLights[i]->color);
             shader->setFloat(spotString + "].ambient", spotLights[i]->ambient);
             shader->setFloat(spotString + "].diffuse", spotLights[i]->diffuse);
@@ -60,9 +61,9 @@ namespace lightSystem {
             shader->setFloat(spotString + "].constant",  spotLights[i]->constant);
             shader->setFloat(spotString + "].linear",    spotLights[i]->linear);
             shader->setFloat(spotString + "].quadratic", spotLights[i]->quadratic);
-            shader->setFloat("].innerCutOff", glm::cos(glm::radians(spotLights[i]->innerCutOff)));
-            shader->setFloat("].outerCutOff", glm::cos(glm::radians(spotLights[i]->outerCutOff)));
-            shader->setVec3("].direction", spotLights[i]->direction);
+            shader->setFloat(spotString + "].innerCutOff", glm::cos(glm::radians(spotLights[i]->innerCutOff)));
+            shader->setFloat(spotString + "].outerCutOff", glm::cos(glm::radians(spotLights[i]->outerCutOff)));
+            shader->setVec3(spotString + "].direction", spotLights[i]->direction);
         }
     }
     void LightingSystem::AddDirectionLight(DirectionLight *directionLight)

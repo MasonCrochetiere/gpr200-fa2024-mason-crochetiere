@@ -85,6 +85,7 @@ int main() {
 	lightSystem::PointLight cubeLight1 = PointLight();
 	lightSystem::PointLight cubeLight = PointLight();
 	lightSystem::SpotLight flashlight = SpotLight();
+	flashlight.diffuse = 0.8f;
 	lightSystem::DirectionLight dirLight = DirectionLight();
 	lightSystem.AddPointLight(&cubeLight1);
 	lightSystem.AddPointLight(&cubeLight);
