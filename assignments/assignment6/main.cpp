@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <iostream>
 
 #include <ew/external/glad.h>
 #include <ew/ewMath/ewMath.h>
@@ -101,6 +102,83 @@ unsigned int indices[] = {  // note that we start from 0!
     1, 2, 3    // second triangle
 };
 
+float skyboxVertices[] = {
+	// positions          
+	-1.0f,  1.0f, -1.0f,
+	-1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f, -1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+
+	-1.0f, -1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f,
+	-1.0f, -1.0f,  1.0f,
+
+	-1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f, -1.0f,
+	 1.0f,  1.0f,  1.0f,
+	 1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f,  1.0f,
+	-1.0f,  1.0f, -1.0f,
+
+	-1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f, -1.0f,
+	 1.0f, -1.0f, -1.0f,
+	-1.0f, -1.0f,  1.0f,
+	 1.0f, -1.0f,  1.0f
+};
+
+unsigned int loadCubemap(std::vector<std::string> faces)
+{
+	unsigned int textureID;
+	glGenTextures(1, &textureID);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
+
+	int width, height, nrChannels;
+	for (unsigned int i = 0; i < faces.size(); i++)
+	{
+		unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		if (data)
+		{
+			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+						0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+			);
+			stbi_image_free(data);
+		}
+		else
+		{
+			std::cout << "Cubemap failed to load at path: " << faces[i] << std::endl;
+			stbi_image_free(data);
+		}
+	}
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+	return textureID;
+}
+
 int main() {
 	printf("Initializing...");
 	if (!glfwInit()) {
@@ -132,9 +210,6 @@ int main() {
 
 	Texture2D texture("assets/cube.png", 0, 0);
 	Texture2D skyBoxMap("assets/skybox.jpg", 0, 0);
-	
-
-
 
 
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
@@ -142,11 +217,21 @@ int main() {
 
 	Shader cubeShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	Shader lightShader("assets/vertexShader.vert", "assets/lightFragmentShader.frag");
+	Shader skyboxShader("assets/skyboxVert.vert", "assets/skyboxFrag.frag");
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
+
+	unsigned int skyboxVAO, skyboxVBO;
+	glGenVertexArrays(1, &skyboxVAO);
+	glGenBuffers(1, &skyboxVBO);
+	glBindVertexArray(skyboxVAO);
+	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
 	//Initialization goes here!
 	unsigned int VBO;
@@ -189,6 +274,17 @@ int main() {
 	glm::vec3 skyBox(0.0, 0.0, 0.0);
 	glm::vec3 skyBoxSize(100.f, 100.f, 100.f);
 
+	std::vector<std::string> faces
+	{
+		"assets/skybox/right.jpg",
+		"assets/skybox/left.jpg",
+		"assets/skybox/top.jpg",
+		"assets/skybox/bottom.jpg",
+		"assets/skybox/front.jpg",
+		"assets/skybox/back.jpg"
+	};
+	unsigned int cubemapTexture = loadCubemap(faces);
+
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -213,6 +309,8 @@ int main() {
 		//glBindTexture(GL_TEXTURE_2D, texture2.getID());
 
 		float timeValue = glfwGetTime();
+
+
 
 		// be sure to activate the shader
 		cubeShader.use();
@@ -270,15 +368,17 @@ int main() {
 
 		//glActiveTexture(GL_TEXTURE1);
 		//glBindTexture(GL_TEXTURE_2D, skyBoxMap.getID());
-		skyBoxMap.Bind(GL_TEXTURE0);
+		//skyBoxMap.Bind(GL_TEXTURE0);
 
-		glm::mat4 skyBoxModel = glm::mat4(1.0f);
-		skyBoxModel = glm::translate(skyBoxModel, skyBox);
-		float skySpin = 25.0f * timeValue;
-		//skyBoxModel = glm::rotate(skyBoxModel, glm::radians(skySpin), skyBoxSize);
-		skyBoxModel = glm::scale(skyBoxModel, skyBoxSize);
-		cubeShader.setMat4("model", skyBoxModel);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+		//glm::mat4 skyBoxModel = glm::mat4(1.0f);
+		//skyBoxModel = glm::translate(skyBoxModel, skyBox);
+		//float skySpin = 25.0f * timeValue;
+		////skyBoxModel = glm::rotate(skyBoxModel, glm::radians(skySpin), skyBoxSize);
+		//skyBoxModel = glm::scale(skyBoxModel, skyBoxSize);
+		//cubeShader.setMat4("model", skyBoxModel);
+		//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+
 
 		lightShader.use();
 
@@ -299,6 +399,18 @@ int main() {
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		glBindVertexArray(0); 
+
+		glDepthMask(GL_FALSE);
+		skyboxShader.use();
+		//view = glm::mat4(1.0f);
+		skyboxShader.setMat4("view", view);
+		skyboxShader.setMat4("projection", projection);
+		glBindVertexArray(skyboxVAO);
+		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+		glDrawArrays(GL_TRIANGLES, 0, 36);
+		glBindVertexArray(0);
+		glDepthMask(GL_TRUE);
+		// ... draw the rest of the scene
 
 		// Start drawing ImGUI
 		ImGui_ImplGlfw_NewFrame();
