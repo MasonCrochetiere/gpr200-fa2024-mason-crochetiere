@@ -27,9 +27,9 @@ ParticleSystem::~ParticleSystem()
 
 void ParticleSystem::updateSystem(float currentTime, float deltaTime)
 {
-	if (currentTime - lastParticleSpawn >= timeBetweenSpawns)
+	if (currentTime - lastParticleSpawn >= particleValues.timeBetweenSpawns)
 	{
-		cout << "Making particle!" << endl;
+		//cout << "Making particle!" << endl;
 		// make particle
 		addParticle(currentTime);
 		lastParticleSpawn = currentTime;
@@ -37,13 +37,18 @@ void ParticleSystem::updateSystem(float currentTime, float deltaTime)
 
 	for (unsigned int i = 0; i < particleVec.size(); i++)
 	{
-		if (currentTime - particleVec.at(i)->getStartTime() >= particleLifetime)
+		if (currentTime - particleVec.at(i)->getStartTime() >= particleValues.particleLifetime)
 		{
 			particlesToDestroyVec.push_back(particleVec.at(i));
 		}
 	}
 
 	destroyQueuedParticles();
+
+	for (unsigned int i = 0; i < particleVec.size(); i++)
+	{
+		particleVec.at(i)->pRenderer->transform.position += particleValues.getVelocity(deltaTime, currentTime, particleVec.at(i)->getStartTime());
+	}
 }
 
 void ParticleSystem::destroyQueuedParticles()
@@ -64,6 +69,11 @@ void ParticleSystem::renderSystem()
 	}
 }
 
+void ParticleSystem::setSystemValues(ParticleSystemValues values)
+{
+	particleValues = values;
+}
+
 void ParticleSystem::addParticle(float sTime)
 {
 	Byte* ptr = particlePool.allocateObject();
@@ -71,6 +81,9 @@ void ParticleSystem::addParticle(float sTime)
 	{
 		//std::cout << "MAKING A UNIT" << endl;
 		Particle* pParticle = new (ptr)Particle(particleMesh, *particleShader, sTime);
+		pParticle->pRenderer->transform.position = particleValues.position;
+		pParticle->pRenderer->transform.rotation = particleValues.rotation;
+		pParticle->pRenderer->transform.scale = particleValues.scale;
 
 		particleVec.push_back(pParticle);
 		//pFireBall->mPooledObject = true;

@@ -11,6 +11,8 @@
 
 #include "../MeshSystem/meshGenerator.h"
 
+#include "ParticleSystemValues.h"
+
 class ParticleSystem : public Trackable
 {
 public:
@@ -20,6 +22,8 @@ public:
 	void updateSystem(float currentTime, float deltaTime);
 	void destroyQueuedParticles();
 	void renderSystem();
+	void setSystemValues(ParticleSystemValues values);
+
 	void addParticle(float sTime);
 	void removeParticle(Particle* pParticleToDestroy);
 
@@ -35,9 +39,8 @@ private:
 	meshSystem::Mesh particleMesh;
 	macroLib::Shader* particleShader;
 
-	float lastParticleSpawn = 0.0f;
+	ParticleSystemValues particleValues;
 
-	const float timeBetweenSpawns = 0.6f;
-	const float particleLifetime = 2.0f;
+	float lastParticleSpawn = 0.0f;
 
 };

@@ -15,11 +15,14 @@ public:
 	Particle(Mesh particleMesh, Shader &particleShader, float sTime);
 	~Particle();
 
-	void renderParticle();
-
-	float getStartTime() { return startTime; }
-
-private:
 	meshSystem::MeshRenderer* pRenderer;
+
+	void renderParticle();
+	float getStartTime() { return startTime; }
+private:
+	
 	float startTime = 0;
+
+	// so this vector is a value between -1 and 1 for each xyz, representing this particle's offset in relation to the system.
+	glm::vec3 velocityOffset;
 };

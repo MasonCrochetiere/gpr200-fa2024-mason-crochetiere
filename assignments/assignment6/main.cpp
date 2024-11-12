@@ -51,6 +51,13 @@ float diffuseK = 1.0f;
 float specularK = 0.08f;
 float shininess = 2.0f;
 
+bool seeParticleSettings;
+bool seeParticleTransform;
+bool seeParticleVelocity;
+bool seeParticleSpawn;
+
+ParticleSystemValues particleValues;
+
 float vertices[] = {
 	//  X      Y      Z      U     V     NX     NY     NZ
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
@@ -95,23 +102,6 @@ float vertices[] = {
 	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f
 };
-
-glm::vec3 cubePositions[] = {
-	glm::vec3(0.0f,  0.0f,  0.0f),
-	glm::vec3(2.0f,  5.0f, -15.0f),
-	glm::vec3(-1.5f, -2.2f, -2.5f),
-	glm::vec3(-3.8f, -2.0f, -12.3f),
-	glm::vec3(2.4f, -0.4f, -3.5f),
-	glm::vec3(-1.7f,  3.0f, -7.5f),
-	glm::vec3(1.3f, -2.0f, -2.5f),
-	glm::vec3(1.5f,  2.0f, -2.5f),
-	glm::vec3(1.5f,  0.2f, -1.5f),
-	glm::vec3(-1.3f,  1.0f, -1.5f)
-};
-
-
-
-
 
 unsigned int indices[] = {  // note that we start from 0!
     0, 1, 3,   // first triangle
@@ -220,6 +210,8 @@ int main() {
 
 			// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
 
+			particleSystem.setSystemValues(particleValues);
+
 			particleSystem.updateSystem(timeValue, deltaTime);
 
 			// ---------RENDER LOGIC (So most of it because graphics programming LOL)------------------\\
@@ -304,6 +296,35 @@ int main() {
 			ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
 			ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
 
+			//Separate particle settings
+			ImGui::Checkbox("View Particle Settings", &seeParticleSettings);
+
+			if (seeParticleSettings)
+			{
+				ImGui::Checkbox("Transform!", &seeParticleTransform);
+				if (seeParticleTransform)
+				{
+					ImGui::DragFloat3("System Position", &particleValues.position.x, 1.0f);
+					ImGui::DragFloat3("System Rotation", &particleValues.rotation.x, 1.0f);
+					ImGui::DragFloat3("System Scale", &particleValues.scale.x, 1.0f);
+				}
+
+				ImGui::Checkbox("Velocity!", &seeParticleVelocity);
+				if (seeParticleVelocity)
+				{
+					ImGui::DragFloat3("Particle Velocity", &particleValues.particleVelocity.x, 0.1f);
+					ImGui::Checkbox("Cos Velocity", &particleValues.cosVelocity);
+					ImGui::Checkbox("Sin Velocity", &particleValues.sinVelocity);
+				}
+
+				ImGui::Checkbox("Particle Spawn!", &seeParticleSpawn);
+				if (seeParticleSpawn)
+				{
+					ImGui::DragFloat("Time Between Spawns", &particleValues.timeBetweenSpawns);
+					ImGui::DragFloat("Particle Lifetime", &particleValues.particleLifetime);
+				}
+			}	
+
 			ImGui::End();
 
 			// Do the actual rendering with OpenGL
@@ -314,27 +335,10 @@ int main() {
 			glfwSwapBuffers(window);
 		}
 
-		//for (unsigned int i = 0; i < particleVec.size(); i++)
-		//{
-		//	MeshRenderer* target = (MeshRenderer*)particleVec.at(i);
-
-		//	target->~MeshRenderer();
-		//	particlePool.freeObject((Byte*)target);
-
-		//}
-		//particleVec.clear();
-
-		//std::cout << "Pooled objects " << particlePool.getNumFreeObjects() << std::endl;
 	} // so this set of brackets exists to put the project all in one scope
 	// that way any instanced objects are deleted at the end
 	// which means that checking for memory leaks:tm: works just fine.
 	MemoryTracker::getInstance()->reportAllocations(std::cout);
 
 	printf("Shutting down...");
-}
-
-void runProgram()
-{
-
-
 }
