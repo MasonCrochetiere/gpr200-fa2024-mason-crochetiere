@@ -23,11 +23,11 @@ add_library(core STATIC ${CORE_SRC} ${CORE_INC} "macroLib/shader.h" "macroLib/sh
         MeshSystem/MeshRenderer.cpp
         MeshSystem/MeshRenderer.h
         Lighting/LightingSystem.cpp
-        Lighting/LightingSystem.h)
+        Lighting/LightingSystem.h "MeshSystem/Model.h" "MeshSystem/Model.cpp")
 
 find_package(OpenGL REQUIRED)
 
-target_link_libraries(core PUBLIC IMGUI glm)
+target_link_libraries(core PUBLIC IMGUI glm assimp)
 
 install (TARGETS core DESTINATION lib)
 install (FILES ${CORE_INC} DESTINATION include/core)
