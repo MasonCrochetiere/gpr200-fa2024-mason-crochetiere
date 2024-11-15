@@ -304,7 +304,17 @@ int main() {
 				ImGui::Checkbox("Transform!", &seeParticleTransform);
 				if (seeParticleTransform)
 				{
-					ImGui::DragFloat3("System Position", &particleValues.position.x, 1.0f);
+					ImGui::Checkbox("Use Random Position!", &particleValues.useRandomPosition);
+					if (particleValues.useRandomPosition)
+					{
+						ImGui::DragFloat3("Position Min", &particleValues.randomPosMin.x, 1.0f);
+						ImGui::DragFloat3("Position Max", &particleValues.randomPosMax.x, 1.0f);
+					}
+					else
+					{
+						ImGui::DragFloat3("System Position", &particleValues.position.x, 1.0f);
+					}
+
 					ImGui::DragFloat3("System Rotation", &particleValues.rotation.x, 1.0f);
 					ImGui::DragFloat3("System Scale", &particleValues.scale.x, 1.0f);
 				}
@@ -312,7 +322,15 @@ int main() {
 				ImGui::Checkbox("Velocity!", &seeParticleVelocity);
 				if (seeParticleVelocity)
 				{
+					ImGui::Checkbox("Use Random Velocity", &particleValues.useRandomVelocity);
 					ImGui::DragFloat3("Particle Velocity", &particleValues.particleVelocity.x, 0.1f);
+
+					if (particleValues.useRandomVelocity)
+					{
+						ImGui::DragFloat3("Random * Min", &particleValues.randomVelocityMin.x, 0.1f);
+						ImGui::DragFloat3("Random * Max", &particleValues.randomVelocityMax.x, 0.1f);
+					}
+
 					ImGui::Checkbox("Cos Velocity", &particleValues.cosVelocity);
 					ImGui::Checkbox("Sin Velocity", &particleValues.sinVelocity);
 				}

@@ -13,6 +13,14 @@ struct ParticleSystemValues
 
 	glm::vec3 particleVelocity = glm::vec3(1.0, 1.0, 1.0);
 
+	bool useRandomVelocity = false;
+	glm::vec3 randomVelocityMin = glm::vec3(1.0, 1.0, 1.0);
+	glm::vec3 randomVelocityMax = glm::vec3(1.0, 1.0, 1.0);
+
+	bool useRandomPosition = false;
+	glm::vec3 randomPosMin = glm::vec3(1.0, 1.0, 1.0);
+	glm::vec3 randomPosMax = glm::vec3(1.0, 1.0, 1.0);
+
 	bool sinVelocity = false;
 	bool cosVelocity = false;
 	bool tanVelocity = false;
