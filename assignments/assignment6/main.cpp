@@ -39,6 +39,44 @@ float diffuseK = 1.0f;
 float specularK = 0.08f;
 float shininess = 2.0f;
 
+float radius = 5.0f;
+int numSegments = 8;
+
+////SPHERE VERTICES
+//// look @ the example to finish the circle
+//// https://github.com/ewinebrenner/FA24-GPR-200-Example/tree/main/assignments/proceduralGeometry
+//thetaStep = (2 * PI) / numSegments;
+//phiStep = PI / numSegments;
+//for (row = 0; row <= numSegments)
+//{
+//	phi = row * phiStep;
+//	for (col = 0; col <= numSegments)
+//	{
+//		theta = col * thetaStep;
+//		// the setting of the xyz is done using the vertex struct
+//		v.x = radius * cos(theta) * sin(phi);
+//		v.y = radius * cos(phi);
+//		v.z = radius * sin(theta) * sin(phi);
+//		vertices.push_back(v);
+//	}
+//}
+//
+////SPHERE INDICIES
+//// should be identical to the subdivided plane ones
+//columns = numSegments + 1;
+//for (row = 1; row < numSegments - 1)
+//{
+//	for (col = 0; col < numSegments)
+//	{
+//		start = row * columns + col;
+//		// Triangle 1
+//		indicies.push_back(start);
+//		indicies.push_back(start + 1);
+//		indicies.push_back(start + columns);
+//		// triangle 2...
+//	}
+//}
+
 float vertices[] = {
 	//  X      Y      Z      U     V     NX     NY     NZ
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
@@ -104,51 +142,53 @@ unsigned int indices[] = {  // note that we start from 0!
 
 float skyboxVertices[] = {
 	// positions          
-	-1.0f,  1.0f, -1.0f,
-	-1.0f, -1.0f, -1.0f,
-	 1.0f, -1.0f, -1.0f,
-	 1.0f, -1.0f, -1.0f,
-	 1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
+	-100.0f,  100.0f, -100.0f,
+	-100.0f, -100.0f, -100.0f,
+	 100.0f, -100.0f, -100.0f,
+	 100.0f, -100.0f, -100.0f,
+	 100.0f,  100.0f, -100.0f,
+	-100.0f,  100.0f, -100.0f,
+	  		   			
+	-100.0f, -100.0f,  100.0f,
+	-100.0f, -100.0f, -100.0f,
+	-100.0f,  100.0f, -100.0f,
+	-100.0f,  100.0f, -100.0f,
+	-100.0f,  100.0f,  100.0f,
+	-100.0f, -100.0f,  100.0f,
+	  		   			
+	 100.0f, -100.0f, -100.0f,
+	 100.0f, -100.0f,  100.0f,
+	 100.0f,  100.0f,  100.0f,
+	 100.0f,  100.0f,  100.0f,
+	 100.0f,  100.0f, -100.0f,
+	 100.0f, -100.0f, -100.0f,
+	  		   			
+	-100.0f, -100.0f,  100.0f,
+	-100.0f,  100.0f,  100.0f,
+	 100.0f,  100.0f,  100.0f,
+	 100.0f,  100.0f,  100.0f,
+	 100.0f, -100.0f,  100.0f,
+	-100.0f, -100.0f,  100.0f,
+	  		   			
+	-100.0f,  100.0f, -100.0f,
+	 100.0f,  100.0f, -100.0f,
+	 100.0f,  100.0f,  100.0f,
+	 100.0f,  100.0f,  100.0f,
+	-100.0f,  100.0f,  100.0f,
+	-100.0f,  100.0f, -100.0f,
+	  		   			
+	-100.0f, -100.0f, -100.0f,
+	-100.0f, -100.0f,  100.0f,
+	 100.0f, -100.0f, -100.0f,
+	 100.0f, -100.0f, -100.0f,
+	-100.0f, -100.0f,  100.0f,
+	 100.0f, -100.0f,  100.0f
+};			   
 
-	-1.0f, -1.0f,  1.0f,
-	-1.0f, -1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f, -1.0f,
-	-1.0f,  1.0f,  1.0f,
-	-1.0f, -1.0f,  1.0f,
-
-	 1.0f, -1.0f, -1.0f,
-	 1.0f, -1.0f,  1.0f,
-	 1.0f,  1.0f,  1.0f,
-	 1.0f,  1.0f,  1.0f,
-	 1.0f,  1.0f, -1.0f,
-	 1.0f, -1.0f, -1.0f,
-
-	-1.0f, -1.0f,  1.0f,
-	-1.0f,  1.0f,  1.0f,
-	 1.0f,  1.0f,  1.0f,
-	 1.0f,  1.0f,  1.0f,
-	 1.0f, -1.0f,  1.0f,
-	-1.0f, -1.0f,  1.0f,
-
-	-1.0f,  1.0f, -1.0f,
-	 1.0f,  1.0f, -1.0f,
-	 1.0f,  1.0f,  1.0f,
-	 1.0f,  1.0f,  1.0f,
-	-1.0f,  1.0f,  1.0f,
-	-1.0f,  1.0f, -1.0f,
-
-	-1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f,  1.0f,
-	 1.0f, -1.0f, -1.0f,
-	 1.0f, -1.0f, -1.0f,
-	-1.0f, -1.0f,  1.0f,
-	 1.0f, -1.0f,  1.0f
-};
 
 unsigned int loadCubemap(std::vector<std::string> faces)
 {
+	stbi_set_flip_vertically_on_load(false);
 	unsigned int textureID;
 	glGenTextures(1, &textureID);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureID);
@@ -220,9 +260,6 @@ int main() {
 	Shader skyboxShader("assets/skyboxVert.vert", "assets/skyboxFrag.frag");
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
 
 	unsigned int skyboxVAO, skyboxVBO;
 	glGenVertexArrays(1, &skyboxVAO);
@@ -233,6 +270,12 @@ int main() {
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+
+	unsigned int VAO;
+	glGenVertexArrays(1, &VAO);
+	glBindVertexArray(VAO);
+
+	
 	//Initialization goes here!
 	unsigned int VBO;
 	glGenBuffers(1, &VBO); // populates VBO with the next available buffer indicator
@@ -274,16 +317,29 @@ int main() {
 	glm::vec3 skyBox(0.0, 0.0, 0.0);
 	glm::vec3 skyBoxSize(100.f, 100.f, 100.f);
 
+	//std::vector<std::string> faces
+	//{
+	//	"assets/skybox/right.jpg",
+	//	"assets/skybox/left.jpg",
+	//	"assets/skybox/top.jpg",
+	//	"assets/skybox/bottom.jpg",
+	//	"assets/skybox/front.jpg",
+	//	"assets/skybox/back.jpg"
+	//};
+
 	std::vector<std::string> faces
 	{
-		"assets/skybox/right.jpg",
-		"assets/skybox/left.jpg",
-		"assets/skybox/top.jpg",
-		"assets/skybox/bottom.jpg",
-		"assets/skybox/front.jpg",
-		"assets/skybox/back.jpg"
+		"assets/skybox/newRight.png",
+		"assets/skybox/newLeft.png",
+		"assets/skybox/newTop.png",
+		"assets/skybox/newBottom.png",
+		"assets/skybox/newFront.png",
+		"assets/skybox/newBack.png"
 	};
 	unsigned int cubemapTexture = loadCubemap(faces);
+
+	
+
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -402,10 +458,10 @@ int main() {
 
 		glDepthMask(GL_FALSE);
 		skyboxShader.use();
-		//view = glm::mat4(1.0f);
 		skyboxShader.setMat4("view", view);
 		skyboxShader.setMat4("projection", projection);
 		glBindVertexArray(skyboxVAO);
+		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
 		glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
