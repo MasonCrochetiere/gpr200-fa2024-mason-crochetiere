@@ -7,6 +7,7 @@
 #include "../ew/external/glad.h"
 #include "../ew/ewMath/ewMath.h"
 #include <glm/gtc/type_ptr.hpp>
+#include "../macroLib/texture2D.h"
 
 using namespace ew;
 
@@ -24,8 +25,15 @@ namespace meshSystem
     };
     struct MeshData
     {
+        MeshData(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<macroLib::Texture2D> textures)
+        {
+            this->vertices = vertices;
+            this->indices = indices;
+            this->textures = textures;
+        }
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
+        std::vector<macroLib::Texture2D> textures;
         MeshData() = default;
     };
 

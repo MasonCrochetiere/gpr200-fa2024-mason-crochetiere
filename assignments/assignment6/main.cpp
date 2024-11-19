@@ -135,7 +135,6 @@ int main() {
 		flashlight.position = camera.getCameraPos();
 		flashlight.direction = camera.getCameraFront();
 		lightSystem.UpdateLighting(camera.getCameraPos());
-		litShader.setVec3("viewPos", camera.getCameraPos());
 		litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
 		litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
 		litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));

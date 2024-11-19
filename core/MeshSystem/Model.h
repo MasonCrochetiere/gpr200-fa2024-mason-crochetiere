@@ -1,8 +1,10 @@
+//written by Reece
+
 #include <assimp/Importer.hpp>    
 #include <assimp/scene.h>  
 #include <assimp/postprocess.h>
 #include "../macroLib/shader.h"
-#include "../macroLib/texture2D.cpp"
+#include "../macroLib/texture2D.h"
 #include <vector>
 #include "mesh.h"
 
