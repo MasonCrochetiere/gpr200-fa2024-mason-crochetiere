@@ -16,7 +16,7 @@ ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/assets/)
 
 install(FILES ${ASSIGNMENT6_INC} DESTINATION include/assignment6)
 add_executable(assignment6 ${ASSIGNMENT6_SRC} ${ASSIGNMENT6_INC})
-target_link_libraries(assignment6 PUBLIC core IMGUI glm)
+target_link_libraries(assignment6 PUBLIC core IMGUI glm assimp)
 target_include_directories(assignment6 PUBLIC ${CORE_INC_DIR} ${stb_INCLUDE_DIR})
 
 #Trigger asset copy when assignment6 is built

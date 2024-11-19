@@ -155,7 +155,7 @@ int main() {
 		return 1;
 	}
 
-	Shader ourShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	Shader ourShader("assets/defaultVertex.vert", "assets/litShader.frag");
 
 	unsigned int VAO;
 	glGenVertexArrays(1, &VAO);

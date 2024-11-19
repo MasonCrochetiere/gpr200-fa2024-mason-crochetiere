@@ -68,6 +68,6 @@ namespace meshSystem {
         glBindVertexArray(vaoRef);
 
         //draw mesh
-        glDrawElements(GL_TRIANGLES,indicesCount,GL_UNSIGNED_INT,0);
+        glDrawElements(GL_TRIANGLES,indicesCount,GL_UNSIGNED_INT,NULL);
     }
 }
