@@ -16,6 +16,7 @@
 #include <macroLib/shader.h>
 #include <macroLib/texture2D.h>
 #include <macroLib/camera.h>
+
 #include <MeshSystem/mesh.h>
 #include <MeshSystem/meshGenerator.h>
 #include <MeshSystem/MeshRenderer.h>
@@ -25,6 +26,8 @@
 
 #include <DeanLib/include/PerformanceTracker.h>
 #include <DeanLib/include/MemoryTracker.h>
+
+#include <Lighting/LightingSystem.h>
 
 using namespace std;
 
@@ -146,21 +149,25 @@ int main() {
 		//Texture2D texture1("assets/brickTexture.png", 0, 0);
 		//Texture2D texture2("assets/awesomeface.png", 0, 0);
 
-		Shader cubeShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
-		Shader lightShader("assets/vertexShader.vert", "assets/lightFragmentShader.frag");
+		Shader lightShader("assets/vertexShader.vert", "assets/unlitShader.frag");
+		Shader litShader("assets/vertexShader.vert", "assets/litShader.frag");
 		//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 		meshSystem::MeshData cubeMeshData;
 		//meshSystem::generatePlane(5.0f, 5.0f, 32, &cubeMeshData);
 		meshSystem::generateCube(1.0f, &cubeMeshData);
 		meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
-		meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &cubeShader);
+		meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &lightShader);
 
 		//int poolSize = 32;
 		//MemoryPool particlePool(32, sizeof(meshSystem::MeshRenderer));
 		//std::vector<MeshRenderer*> particleVec;
 
-		ParticleSystem particleSystem(32, &cubeShader, cubeMesh);
+		lightSystem::LightingSystem lightSystem(&litShader);
+		ParticleSystem particleSystem(32, &litShader, cubeMesh);
+
+		lightSystem::PointLight myLight = lightSystem::PointLight();
+		lightSystem.AddPointLight(&myLight);
 
 		unsigned int VAO;
 		glGenVertexArrays(1, &VAO);
@@ -214,6 +221,8 @@ int main() {
 
 			particleSystem.updateSystem(timeValue, deltaTime);
 
+			lightSystem.UpdateLighting(camera.getCameraPos());
+
 			// ---------RENDER LOGIC (So most of it because graphics programming LOL)------------------\\
 
 			//Clear framebuffer
@@ -221,16 +230,16 @@ int main() {
 			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
 			// be sure to activate the shader
-			cubeShader.use();
+			litShader.use();
 
-			cubeShader.setVec3("lightPos", lightPos);
-			cubeShader.setVec3("lightColor", lightColor);
-			cubeShader.setVec3("viewPos", camera.getCameraPos());
+			//cubeShader.setVec3("lightPos", lightPos);
+			//cubeShader.setVec3("lightColor", lightColor);
+			litShader.setVec3("viewPos", camera.getCameraPos());
 
-			cubeShader.setFloat("ambientStrength", ambientK);
-			cubeShader.setFloat("diffuseStrength", diffuseK);
-			cubeShader.setFloat("specularStrength", specularK);
-			cubeShader.setFloat("shininessStrength", shininess);
+			litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+			litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+			litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+			litShader.setFloat("material.shininess", 32.0f);
 
 			texture.Bind(GL_TEXTURE0);
 
@@ -246,19 +255,21 @@ int main() {
 
 			// pass projection matrix to shader (note that in this case it could change every frame)
 			projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
-			cubeShader.setMat4("projection", projection);
+			litShader.setMat4("projection", projection);
 
 			// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-			cubeShader.setFloat("uTime", timeValue);
+			litShader.setFloat("uTime", timeValue);
 
-			int viewLoc = glGetUniformLocation(cubeShader.ID, "view");
-			cubeShader.setMat4("view", view);
+			int viewLoc = glGetUniformLocation(litShader.ID, "view");
+			litShader.setMat4("view", view);
 
-			int projectionLoc = glGetUniformLocation(cubeShader.ID, "projection");
-			cubeShader.setMat4("projection", projection);
+			int projectionLoc = glGetUniformLocation(litShader.ID, "projection");
+			litShader.setMat4("projection", projection);
 			// same for View Matrix and Projection Matrix
 
 			glBindVertexArray(VAO);
+			bigCube.transform.position = myLight.position;
+			bigCube.transform.scale = glm::vec3(0.3f);
 			bigCube.modelAndDraw();
 
 			particleSystem.renderSystem();
@@ -289,12 +300,11 @@ int main() {
 			ImGui::Begin("Settings");
 			ImGui::Text("Add Controls Here!");
 
-			ImGui::DragFloat3("Light Position", &lightPos.x, 0.1f);
-			ImGui::ColorEdit3("Light Color", &lightColor.r);
-			ImGui::SliderFloat("Ambient K", &ambientK, 0.0f, 1.0f);
-			ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);
-			ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
-			ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
+			ImGui::DragFloat3("Light Position", &myLight.position.x, 0.1f);
+			ImGui::ColorEdit3("Light Color", &myLight.color.r);
+			ImGui::SliderFloat("Ambient K", &myLight.ambient, 0.0f, 1.0f);
+			ImGui::SliderFloat("Diffuse K", &myLight.diffuse, 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular K", &myLight.specular, 0.0f, 1.0f);
 
 			//Separate particle settings
 			ImGui::Checkbox("View Particle Settings", &seeParticleSettings);
