@@ -3,6 +3,7 @@
 #include <iostream>
 
 #include <ew/external/glad.h>
+#include <ew/procGen.h>
 #include <ew/ewMath/ewMath.h>
 #include <GLFW/glfw3.h>
 
@@ -17,6 +18,8 @@
 #include <macroLib/shader.h>
 #include <macroLib/texture2D.h>
 #include <macroLib/camera.h>
+
+
 using namespace ew;
 using namespace macroLib;
 
@@ -42,40 +45,7 @@ float shininess = 2.0f;
 float radius = 5.0f;
 int numSegments = 8;
 
-////SPHERE VERTICES
-//// look @ the example to finish the circle
-//// https://github.com/ewinebrenner/FA24-GPR-200-Example/tree/main/assignments/proceduralGeometry
-//thetaStep = (2 * PI) / numSegments;
-//phiStep = PI / numSegments;
-//for (row = 0; row <= numSegments)
-//{
-//	phi = row * phiStep;
-//	for (col = 0; col <= numSegments)
-//	{
-//		theta = col * thetaStep;
-//		// the setting of the xyz is done using the vertex struct
-//		v.x = radius * cos(theta) * sin(phi);
-//		v.y = radius * cos(phi);
-//		v.z = radius * sin(theta) * sin(phi);
-//		vertices.push_back(v);
-//	}
-//}
-//
-////SPHERE INDICIES
-//// should be identical to the subdivided plane ones
-//columns = numSegments + 1;
-//for (row = 1; row < numSegments - 1)
-//{
-//	for (col = 0; col < numSegments)
-//	{
-//		start = row * columns + col;
-//		// Triangle 1
-//		indicies.push_back(start);
-//		indicies.push_back(start + 1);
-//		indicies.push_back(start + columns);
-//		// triangle 2...
-//	}
-//}
+
 
 float vertices[] = {
 	//  X      Y      Z      U     V     NX     NY     NZ
@@ -251,9 +221,12 @@ int main() {
 	Texture2D texture("assets/cube.png", 0, 0);
 	Texture2D skyBoxMap("assets/skybox.jpg", 0, 0);
 
-
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
+
+
+
+
 
 	Shader cubeShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	Shader lightShader("assets/vertexShader.vert", "assets/lightFragmentShader.frag");
@@ -339,7 +312,10 @@ int main() {
 	unsigned int cubemapTexture = loadCubemap(faces);
 
 	
-
+	// initializing the sphere
+	ew::MeshData sphereMeshData;
+	ew::createSphere(10.0f, 256, &sphereMeshData);
+	ew::Mesh sphereMesh = ew::Mesh(sphereMeshData);
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -363,6 +339,9 @@ int main() {
 		//glBindTexture(GL_TEXTURE_2D, texture1.getID());
 		//glActiveTexture(GL_TEXTURE1);
 		//glBindTexture(GL_TEXTURE_2D, texture2.getID());
+
+		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
+		sphereMesh.draw(drawMode);
 
 		float timeValue = glfwGetTime();
 
