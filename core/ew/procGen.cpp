@@ -29,15 +29,19 @@ namespace ew
 				uv.y = 1.0 - ((float)row / subDivisions);
 				// the setting of the xyz is done using the vertex struct
 				glm::vec3 pos;
+				float sineTheta = sinf(theta);
 				float cosineTheta = cosf(theta);
 				float sinePhi = sinf(phi);
+				float cosinePhi = cosf(phi);
 
 				pos.x = cosineTheta * sinePhi;
-				pos.y = sinePhi;
-				pos.z = cosineTheta * sinePhi;
-				
+				pos.y = cosinePhi;
+				pos.z = sineTheta * sinePhi;
+
 				// bc pos isn't multiplied bu radius it is already the normal, minor optimization change
 				mesh->vertices.emplace_back((pos * radius), pos, uv);
+
+				
 			}
 		}
 		
@@ -58,7 +62,7 @@ namespace ew
 				mesh->indices.emplace_back(tr);
 				// Triangle 2
 				mesh->indices.emplace_back(tr);
-				mesh->indices.emplace_back(bl);
+				mesh->indices.emplace_back(tl);
 				mesh->indices.emplace_back(bl);			}
 		}
 		return;

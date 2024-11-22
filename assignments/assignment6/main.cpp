@@ -44,7 +44,7 @@ float shininess = 2.0f;
 
 float radius = 5.0f;
 int numSegments = 8;
-
+bool pointRender = false;
 
 
 float vertices[] = {
@@ -225,9 +225,6 @@ int main() {
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
 
 
-
-
-
 	Shader cubeShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
 	Shader lightShader("assets/vertexShader.vert", "assets/lightFragmentShader.frag");
 	Shader skyboxShader("assets/skyboxVert.vert", "assets/skyboxFrag.frag");
@@ -287,18 +284,9 @@ int main() {
 		
 	}
 
-	glm::vec3 skyBox(0.0, 0.0, 0.0);
-	glm::vec3 skyBoxSize(100.f, 100.f, 100.f);
+	//glm::vec3 skyBox(0.0, 0.0, 0.0);
+	//glm::vec3 skyBoxSize(100.f, 100.f, 100.f);
 
-	//std::vector<std::string> faces
-	//{
-	//	"assets/skybox/right.jpg",
-	//	"assets/skybox/left.jpg",
-	//	"assets/skybox/top.jpg",
-	//	"assets/skybox/bottom.jpg",
-	//	"assets/skybox/front.jpg",
-	//	"assets/skybox/back.jpg"
-	//};
 
 	std::vector<std::string> faces
 	{
@@ -314,8 +302,10 @@ int main() {
 	
 	// initializing the sphere
 	ew::MeshData sphereMeshData;
-	ew::createSphere(10.0f, 256, &sphereMeshData);
+	ew::createSphere(100.0f, 256, &sphereMeshData);
 	ew::Mesh sphereMesh = ew::Mesh(sphereMeshData);
+
+
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -340,12 +330,20 @@ int main() {
 		//glActiveTexture(GL_TEXTURE1);
 		//glBindTexture(GL_TEXTURE_2D, texture2.getID());
 
-		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
-		sphereMesh.draw(drawMode);
+		
+
 
 		float timeValue = glfwGetTime();
 
-
+		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
+		skyboxShader.use();
+		{
+			glm::mat4 sphereSpin = glm::mat4(1);
+			sphereSpin = glm::rotate(sphereSpin, timeValue * glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 1.0f));
+			skyboxShader.setMat4("model", sphereSpin);
+			sphereMesh.draw(drawMode);
+		}
+		//sphereMesh.draw(drawMode);
 
 		// be sure to activate the shader
 		cubeShader.use();
@@ -442,7 +440,7 @@ int main() {
 		glBindVertexArray(skyboxVAO);
 		glActiveTexture(GL_TEXTURE0);
 		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+	//	glDrawArrays(GL_TRIANGLES, 0, 36);
 		glBindVertexArray(0);
 		glDepthMask(GL_TRUE);
 		// ... draw the rest of the scene
