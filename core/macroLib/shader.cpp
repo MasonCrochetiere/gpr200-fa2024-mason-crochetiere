@@ -100,7 +100,6 @@ namespace macroLib {
     {
         glUniform1f(glGetUniformLocation(ID, name.c_str()), value);
     }
-
     void Shader::setMat4(const std::string name, const glm::mat4& m) const {
         glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &m[0][0]);
     }
