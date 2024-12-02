@@ -20,8 +20,24 @@
 #include <macroLib/camera.h>
 
 
+#include <MeshSystem/mesh.h>
+#include <MeshSystem/meshGenerator.h>
+#include <MeshSystem/MeshRenderer.h>
+
+#include <ParticleSystem/MemoryPool.h>
+#include <ParticleSystem/ParticleSystem.h>
+
+#include <DeanLib/include/PerformanceTracker.h>
+#include <DeanLib/include/MemoryTracker.h>
+
+#include <Lighting/LightingSystem.h>
+
+using namespace std;
+
+
 using namespace ew;
 using namespace macroLib;
+using namespace meshSystem;
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
@@ -42,9 +58,18 @@ float diffuseK = 1.0f;
 float specularK = 0.08f;
 float shininess = 2.0f;
 
+
+bool seeParticleSettings;
+bool seeParticleTransform;
+bool seeParticleVelocity;
+bool seeParticleSpawn;
+
+ParticleSystemValues particleValues;
+
 float radius = 5.0f;
 int numSegments = 8;
 bool pointRender = false;
+
 
 
 float vertices[] = {
@@ -90,19 +115,6 @@ float vertices[] = {
 	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
 	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f
-};
-
-glm::vec3 cubePositions[] = {
-	glm::vec3(0.0f,  0.0f,  0.0f),
-	glm::vec3(2.0f,  5.0f, -15.0f),
-	glm::vec3(-1.5f, -2.2f, -2.5f),
-	glm::vec3(-3.8f, -2.0f, -12.3f),
-	glm::vec3(2.4f, -0.4f, -3.5f),
-	glm::vec3(-1.7f,  3.0f, -7.5f),
-	glm::vec3(1.3f, -2.0f, -2.5f),
-	glm::vec3(1.5f,  2.0f, -2.5f),
-	glm::vec3(1.5f,  0.2f, -1.5f),
-	glm::vec3(-1.3f,  1.0f, -1.5f)
 };
 
 unsigned int indices[] = {  // note that we start from 0!
@@ -269,20 +281,8 @@ int main() {
 
 	glm::vec3 cubes[CUBE_COUNT][3];
 	for (int i = 0; i < CUBE_COUNT; i++)
-	{
-		cubes[i][0].x = RandomRange(-4, 4);
-		cubes[i][0].y = RandomRange(-4, 4);
-		cubes[i][0].z = RandomRange(-0.5, -10);
 
-		cubes[i][1].x = RandomRange(0.5, 4);
-		cubes[i][1].y = RandomRange(0.5, 4);
-		cubes[i][1].z = RandomRange(0.5, 4);
-
-		cubes[i][2].x = RandomRange(0.1, 1.5);
-		cubes[i][2].y = RandomRange(0.1, 1.5);
-		cubes[i][2].z = RandomRange(0.1, 1.5);
-		
-	}
+	
 
 	//glm::vec3 skyBox(0.0, 0.0, 0.0);
 	//glm::vec3 skyBoxSize(100.f, 100.f, 100.f);
@@ -311,24 +311,23 @@ int main() {
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
 
-		// per-frame time logic
-		float currentFrame = static_cast<float>(glfwGetTime());
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
 
-		camera.updateTime(deltaTime);
 
-		// input
-		camera.processInput(window);
 
-		//Clear framebuffer
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, texture1.getID());
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_2D, texture2.getID());
+
+		// configure global opengl state
+		// -----------------------------
+		glEnable(GL_DEPTH_TEST);
+
+
+		Texture2D texture("assets/cube.png", 0, 0);
+		//Texture2D texture1("assets/brickTexture.png", 0, 0);
+		//Texture2D texture2("assets/awesomeface.png", 0, 0);
+
+		Shader lightShader("assets/vertexShader.vert", "assets/unlitShader.frag");
+		Shader litShader("assets/vertexShader.vert", "assets/litShader.frag");
+		//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 		
 
@@ -348,56 +347,71 @@ int main() {
 		// be sure to activate the shader
 		cubeShader.use();
 
-		cubeShader.setVec3("lightPos", lightPos);
-		cubeShader.setVec3("lightColor", lightColor);
-		cubeShader.setVec3("viewPos", camera.getCameraPos());
 
-		cubeShader.setFloat("ambientStrength", ambientK);
-		cubeShader.setFloat("diffuseStrength", diffuseK);
-		cubeShader.setFloat("specularStrength", specularK);
-		cubeShader.setFloat("shininessStrength", shininess);
-		
+		meshSystem::MeshData cubeMeshData;
+		//meshSystem::generatePlane(5.0f, 5.0f, 32, &cubeMeshData);
+		meshSystem::generateCube(1.0f, &cubeMeshData);
+		meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
+		meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &lightShader);
 
-		texture.Bind(GL_TEXTURE0);
+		//int poolSize = 32;
+		//MemoryPool particlePool(32, sizeof(meshSystem::MeshRenderer));
+		//std::vector<MeshRenderer*> particleVec;
 
-		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 projection = glm::mat4(1.0f);
-	
-		// note that we're translating the scene in the reverse direction of where we want to move
-		view = glm::lookAt(camera.getCameraPos(), camera.getCameraPos() + camera.getCameraFront(), camera.getCameraUp());
-		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+		lightSystem::LightingSystem lightSystem(&litShader);
+		ParticleSystem particleSystem(32, &litShader, cubeMesh);
 
-		model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-				
-		// pass projection matrix to shader (note that in this case it could change every frame)
-		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
-		cubeShader.setMat4("projection", projection);
+		lightSystem::PointLight myLight = lightSystem::PointLight();
+		lightSystem.AddPointLight(&myLight);
 
-		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-		cubeShader.setFloat("uTime", timeValue);
-
-		int viewLoc = glGetUniformLocation(cubeShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-
-		int projectionLoc = glGetUniformLocation(cubeShader.ID, "projection");
-		cubeShader.setMat4("projection", projection);
-		// same for View Matrix and Projection Matrix
-
+		unsigned int VAO;
+		glGenVertexArrays(1, &VAO);
 		glBindVertexArray(VAO);
-		for (unsigned int i = 0; i < CUBE_COUNT; i++)
-		{
-			glm::mat4 model = glm::mat4(1.0f);
+
+		//Initialization goes here!
+		unsigned int VBO;
+		glGenBuffers(1, &VBO); // populates VBO with the next available buffer indicator
+		glBindBuffer(GL_ARRAY_BUFFER, VBO); // sets the buffer to mess with to be VBO
+		glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // so this transfers vertex data from CPU to GPU?
+
+		// position (getting XYZ)
+		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
+		// telling GPU when to jump in data (how many bytes slash floats) to get to each vertex
+		glEnableVertexAttribArray(0);
+
+		// color (getting RGBA)
+		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3));
+		// same as above function. the final parameter is the offset (in bytes) to retrieve the data
+		glEnableVertexAttribArray(1);
+
+		// setting Normals
+		glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 5));
+		// same as above.
+		glEnableVertexAttribArray(2);
+
+		//glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
+
+		//Render loop
+		while (!glfwWindowShouldClose(window)) {
+			glfwPollEvents();
+
+			// ---------------------------------- UPDATE TIME------------------------------------------\\
 			
-			model = glm::translate(model, cubes[i][0]); //  c cubePositions[i]
-			float angle = 20.0f * (i+1) * glm::sin(timeValue);
-			model = glm::rotate(model, glm::radians(angle), cubes[i][1]); // glm::vec3(1.0f, 0.3f, 0.5f)  // 
-			model = glm::scale(model, cubes[i][2]);
+			// per-frame time logic
+			float timeValue = glfwGetTime();
 
-			cubeShader.setMat4("model", model);
+			float currentFrame = static_cast<float>(glfwGetTime());
+			deltaTime = currentFrame - lastFrame;
+			lastFrame = currentFrame;
 
-			glDrawArrays(GL_TRIANGLES, 0, 36);
-		}
+			camera.updateTime(deltaTime);
+
+			// -------------------------------------GET INPUT------------------------------------------\\
+
+			camera.processInput(window);
+
+
+			// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
 
 		//glActiveTexture(GL_TEXTURE1);
 		//glBindTexture(GL_TEXTURE_2D, skyBoxMap.getID());
@@ -415,23 +429,22 @@ int main() {
 
 		lightShader.use();
 
-		lightShader.setMat4("projection", projection);
 
-		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-		lightShader.setFloat("uTime", timeValue);
-		viewLoc = glGetUniformLocation(lightShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-		projectionLoc = glGetUniformLocation(lightShader.ID, "projection");
-		lightShader.setMat4("projection", projection);
+			particleSystem.setSystemValues(particleValues);
 
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
-		lightShader.setMat4("model", model);
-		lightShader.setVec3("lightColor", lightColor);
+			particleSystem.updateSystem(timeValue, deltaTime);
 
-		glDrawArrays(GL_TRIANGLES, 0, 36);
+			lightSystem.UpdateLighting(camera.getCameraPos());
 
-		glBindVertexArray(0); 
+			// ---------RENDER LOGIC (So most of it because graphics programming LOL)------------------\\
+
+			//Clear framebuffer
+			glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+			glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+
+			// be sure to activate the shader
+			litShader.use();
 
 		glDepthMask(GL_FALSE);
 		skyboxShader.use();
@@ -450,25 +463,142 @@ int main() {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 
-		//Create a window called Settings
-		ImGui::Begin("Settings");
-		ImGui::Text("Add Controls Here!");
 
-		ImGui::DragFloat3("Light Position", &lightPos.x, 0.1f);
-		ImGui::ColorEdit3("Light Color", &lightColor.r);
-		ImGui::SliderFloat("Ambient K", &ambientK, 0.0f, 1.0f);
-		ImGui::SliderFloat("Diffuse K", &diffuseK, 0.0f, 1.0f);
-		ImGui::SliderFloat("Specular K", &specularK, 0.0f, 1.0f);
-		ImGui::SliderFloat("Shininess", &shininess, 2.0f, 1024.0f);
+			//cubeShader.setVec3("lightPos", lightPos);
+			//cubeShader.setVec3("lightColor", lightColor);
+			litShader.setVec3("viewPos", camera.getCameraPos());
 
-		ImGui::End();
+			litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+			litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+			litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+			litShader.setFloat("material.shininess", 32.0f);
 
-		// Do the actual rendering with OpenGL
-		ImGui::Render();
-		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+			texture.Bind(GL_TEXTURE0);
 
-		//Drawing happens here!
-		glfwSwapBuffers(window);
-	}
+			glm::mat4 model = glm::mat4(1.0f);
+			glm::mat4 view = glm::mat4(1.0f);
+			glm::mat4 projection = glm::mat4(1.0f);
+
+			// note that we're translating the scene in the reverse direction of where we want to move
+			view = glm::lookAt(camera.getCameraPos(), camera.getCameraPos() + camera.getCameraFront(), camera.getCameraUp());
+			//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+			model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+
+			// pass projection matrix to shader (note that in this case it could change every frame)
+			projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
+			litShader.setMat4("projection", projection);
+
+			// setting uniform values. probably want to get the vertex locations outside of update for efficiency
+			litShader.setFloat("uTime", timeValue);
+
+			int viewLoc = glGetUniformLocation(litShader.ID, "view");
+			litShader.setMat4("view", view);
+
+			int projectionLoc = glGetUniformLocation(litShader.ID, "projection");
+			litShader.setMat4("projection", projection);
+			// same for View Matrix and Projection Matrix
+
+			glBindVertexArray(VAO);
+			bigCube.transform.position = myLight.position;
+			bigCube.transform.scale = glm::vec3(0.3f);
+			bigCube.modelAndDraw();
+
+			particleSystem.renderSystem();
+
+			lightShader.use();
+
+
+			viewLoc = glGetUniformLocation(lightShader.ID, "view");
+			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+			projectionLoc = glGetUniformLocation(lightShader.ID, "projection");
+			lightShader.setMat4("projection", projection);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, lightPos);
+			lightShader.setMat4("model", model);
+			lightShader.setVec3("lightColor", lightColor);
+
+			//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			glBindVertexArray(0);
+
+			// Start drawing ImGUI
+			ImGui_ImplGlfw_NewFrame();
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui::NewFrame();
+
+			//Create a window called Settings
+			ImGui::Begin("Settings");
+			ImGui::Text("Add Controls Here!");
+
+			ImGui::DragFloat3("Light Position", &myLight.position.x, 0.1f);
+			ImGui::ColorEdit3("Light Color", &myLight.color.r);
+			ImGui::SliderFloat("Ambient K", &myLight.ambient, 0.0f, 1.0f);
+			ImGui::SliderFloat("Diffuse K", &myLight.diffuse, 0.0f, 1.0f);
+			ImGui::SliderFloat("Specular K", &myLight.specular, 0.0f, 1.0f);
+
+			//Separate particle settings
+			ImGui::Checkbox("View Particle Settings", &seeParticleSettings);
+
+			if (seeParticleSettings)
+			{
+				ImGui::Checkbox("Transform!", &seeParticleTransform);
+				if (seeParticleTransform)
+				{
+					ImGui::Checkbox("Use Random Position!", &particleValues.useRandomPosition);
+					if (particleValues.useRandomPosition)
+					{
+						ImGui::DragFloat3("Position Min", &particleValues.randomPosMin.x, 1.0f);
+						ImGui::DragFloat3("Position Max", &particleValues.randomPosMax.x, 1.0f);
+					}
+					else
+					{
+						ImGui::DragFloat3("System Position", &particleValues.position.x, 1.0f);
+					}
+
+					ImGui::DragFloat3("System Rotation", &particleValues.rotation.x, 1.0f);
+					ImGui::DragFloat3("System Scale", &particleValues.scale.x, 1.0f);
+				}
+
+				ImGui::Checkbox("Velocity!", &seeParticleVelocity);
+				if (seeParticleVelocity)
+				{
+					ImGui::Checkbox("Use Random Velocity", &particleValues.useRandomVelocity);
+					ImGui::DragFloat3("Particle Velocity", &particleValues.particleVelocity.x, 0.1f);
+
+					if (particleValues.useRandomVelocity)
+					{
+						ImGui::DragFloat3("Random * Min", &particleValues.randomVelocityMin.x, 0.1f);
+						ImGui::DragFloat3("Random * Max", &particleValues.randomVelocityMax.x, 0.1f);
+					}
+
+					ImGui::Checkbox("Cos Velocity", &particleValues.cosVelocity);
+					ImGui::Checkbox("Sin Velocity", &particleValues.sinVelocity);
+				}
+
+				ImGui::Checkbox("Particle Spawn!", &seeParticleSpawn);
+				if (seeParticleSpawn)
+				{
+					ImGui::DragFloat("Time Between Spawns", &particleValues.timeBetweenSpawns);
+					ImGui::DragFloat("Particle Lifetime", &particleValues.particleLifetime);
+				}
+			}	
+
+			ImGui::End();
+
+			// Do the actual rendering with OpenGL
+			ImGui::Render();
+			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+			//Drawing happens here!
+			glfwSwapBuffers(window);
+		}
+
+	} // so this set of brackets exists to put the project all in one scope
+	// that way any instanced objects are deleted at the end
+	// which means that checking for memory leaks:tm: works just fine.
+	MemoryTracker::getInstance()->reportAllocations(std::cout);
+
 	printf("Shutting down...");
 }
