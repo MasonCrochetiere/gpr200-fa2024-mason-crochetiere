@@ -118,8 +118,8 @@ float vertices[] = {
 };
 
 unsigned int indices[] = {  // note that we start from 0!
-    0, 1, 3,   // first triangle
-    1, 2, 3    // second triangle
+	0, 1, 3,   // first triangle
+	1, 2, 3    // second triangle
 };
 
 float skyboxVertices[] = {
@@ -130,42 +130,42 @@ float skyboxVertices[] = {
 	 100.0f, -100.0f, -100.0f,
 	 100.0f,  100.0f, -100.0f,
 	-100.0f,  100.0f, -100.0f,
-	  		   			
+
 	-100.0f, -100.0f,  100.0f,
 	-100.0f, -100.0f, -100.0f,
 	-100.0f,  100.0f, -100.0f,
 	-100.0f,  100.0f, -100.0f,
 	-100.0f,  100.0f,  100.0f,
 	-100.0f, -100.0f,  100.0f,
-	  		   			
+
 	 100.0f, -100.0f, -100.0f,
 	 100.0f, -100.0f,  100.0f,
 	 100.0f,  100.0f,  100.0f,
 	 100.0f,  100.0f,  100.0f,
 	 100.0f,  100.0f, -100.0f,
 	 100.0f, -100.0f, -100.0f,
-	  		   			
+
 	-100.0f, -100.0f,  100.0f,
 	-100.0f,  100.0f,  100.0f,
 	 100.0f,  100.0f,  100.0f,
 	 100.0f,  100.0f,  100.0f,
 	 100.0f, -100.0f,  100.0f,
 	-100.0f, -100.0f,  100.0f,
-	  		   			
+
 	-100.0f,  100.0f, -100.0f,
 	 100.0f,  100.0f, -100.0f,
 	 100.0f,  100.0f,  100.0f,
 	 100.0f,  100.0f,  100.0f,
 	-100.0f,  100.0f,  100.0f,
 	-100.0f,  100.0f, -100.0f,
-	  		   			
+
 	-100.0f, -100.0f, -100.0f,
 	-100.0f, -100.0f,  100.0f,
 	 100.0f, -100.0f, -100.0f,
 	 100.0f, -100.0f, -100.0f,
 	-100.0f, -100.0f,  100.0f,
 	 100.0f, -100.0f,  100.0f
-};			   
+};
 
 
 unsigned int loadCubemap(std::vector<std::string> faces)
@@ -178,11 +178,11 @@ unsigned int loadCubemap(std::vector<std::string> faces)
 	int width, height, nrChannels;
 	for (unsigned int i = 0; i < faces.size(); i++)
 	{
-		unsigned char *data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
+		unsigned char* data = stbi_load(faces[i].c_str(), &width, &height, &nrChannels, 0);
 		if (data)
 		{
 			glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-						0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
+				0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data
 			);
 			stbi_image_free(data);
 		}
@@ -257,7 +257,7 @@ int main() {
 	glGenVertexArrays(1, &VAO);
 	glBindVertexArray(VAO);
 
-	
+
 	//Initialization goes here!
 	unsigned int VBO;
 	glGenBuffers(1, &VBO); // populates VBO with the next available buffer indicator
@@ -265,12 +265,12 @@ int main() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // so this transfers vertex data from CPU to GPU?
 
 	// position (getting XYZ)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0); 
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
 	// telling GPU when to jump in data (how many bytes slash floats) to get to each vertex
 	glEnableVertexAttribArray(0);
 
 	// color (getting RGBA)
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3)); 
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3));
 	// same as above function. the final parameter is the offset (in bytes) to retrieve the data
 	glEnableVertexAttribArray(1);
 
@@ -281,8 +281,21 @@ int main() {
 
 	glm::vec3 cubes[CUBE_COUNT][3];
 	for (int i = 0; i < CUBE_COUNT; i++)
+	{
+		cubes[i][0].x = RandomRange(-4, 4);
+		cubes[i][0].y = RandomRange(-4, 4);
+		cubes[i][0].z = RandomRange(-0.5, -10);
 
-	
+		cubes[i][1].x = RandomRange(0.5, 4);
+		cubes[i][1].y = RandomRange(0.5, 4);
+		cubes[i][1].z = RandomRange(0.5, 4);
+
+		cubes[i][2].x = RandomRange(0.1, 1.5);
+		cubes[i][2].y = RandomRange(0.1, 1.5);
+		cubes[i][2].z = RandomRange(0.1, 1.5);
+
+	}
+
 
 	//glm::vec3 skyBox(0.0, 0.0, 0.0);
 	//glm::vec3 skyBoxSize(100.f, 100.f, 100.f);
@@ -299,7 +312,7 @@ int main() {
 	};
 	unsigned int cubemapTexture = loadCubemap(faces);
 
-	
+
 	// initializing the sphere
 	ew::MeshData sphereMeshData;
 	ew::createSphere(100.0f, 256, &sphereMeshData);
@@ -329,7 +342,7 @@ int main() {
 		Shader litShader("assets/vertexShader.vert", "assets/litShader.frag");
 		//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
-		
+
 
 
 		float timeValue = glfwGetTime();
@@ -427,7 +440,7 @@ int main() {
 
 
 
-		lightShader.use();
+			lightShader.use();
 
 
 			particleSystem.setSystemValues(particleValues);
@@ -446,22 +459,22 @@ int main() {
 			// be sure to activate the shader
 			litShader.use();
 
-		glDepthMask(GL_FALSE);
-		skyboxShader.use();
-		skyboxShader.setMat4("view", view);
-		skyboxShader.setMat4("projection", projection);
-		glBindVertexArray(skyboxVAO);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-	//	glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
-		glDepthMask(GL_TRUE);
-		// ... draw the rest of the scene
+			//	glDepthMask(GL_FALSE);
+			//	skyboxShader.use();
+			//	skyboxShader.setMat4("view", view);
+			//	skyboxShader.setMat4("projection", projection);
+			//	glBindVertexArray(skyboxVAO);-------------------------- I moved this section further down
+			//	glActiveTexture(GL_TEXTURE0);                           Because view and position aren't defined
+			//	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);     up here.
+			////	glDrawArrays(GL_TRIANGLES, 0, 36);
+			//	glBindVertexArray(0);
+			//	glDepthMask(GL_TRUE);
+			//	// ... draw the rest of the scene
 
-		// Start drawing ImGUI
-		ImGui_ImplGlfw_NewFrame();
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui::NewFrame();
+				// Start drawing ImGUI
+			ImGui_ImplGlfw_NewFrame();
+			ImGui_ImplOpenGL3_NewFrame();
+			ImGui::NewFrame();
 
 
 			//cubeShader.setVec3("lightPos", lightPos);
@@ -520,6 +533,18 @@ int main() {
 			lightShader.setVec3("lightColor", lightColor);
 
 			//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			glDepthMask(GL_FALSE);
+			skyboxShader.use();
+			skyboxShader.setMat4("view", view);
+			skyboxShader.setMat4("projection", projection);
+			glBindVertexArray(skyboxVAO);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+			//	glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(0);
+			glDepthMask(GL_TRUE);
+			// ... draw the rest of the scene
 
 			glBindVertexArray(0);
 
@@ -583,7 +608,7 @@ int main() {
 					ImGui::DragFloat("Time Between Spawns", &particleValues.timeBetweenSpawns);
 					ImGui::DragFloat("Particle Lifetime", &particleValues.particleLifetime);
 				}
-			}	
+			}
 
 			ImGui::End();
 
