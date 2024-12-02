@@ -134,8 +134,8 @@ int main() {
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
 
-	Shader cubeShader("assets/defaultVertex.vert", "assets/litShader.frag");
-	Shader lightShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
+	Shader cubeShader("assets/vertexShader.vert", "assets/fragmentShader.frag");
+	Shader lightShader("assets/vertexShader.vert", "assets/lightFragmentShader.frag");
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 	unsigned int VAO;
@@ -180,19 +180,6 @@ int main() {
 		
 	}
 
-	glm::vec3 heldPosition(0.0, 0.0, 0.0);
-	glm::vec3 currentVelocity(0.0, 0.0, 0.0);
-	glm::vec3 currentAcceleration(0.0, 0.0, 0.0);
-
-	float maxVal = 3;
-	float swapDelay = 3.0;
-	float swapTime = -1 * swapDelay;
-
-	bool borderX = false;
-	bool borderY = true;
-
-	float borderValue = 6.0;
-
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -229,20 +216,20 @@ int main() {
 		cubeShader.setFloat("diffuseStrength", diffuseK);
 		cubeShader.setFloat("specularStrength", specularK);
 		cubeShader.setFloat("shininessStrength", shininess);
-
+		
 
 		texture.Bind(GL_TEXTURE0);
 
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = glm::mat4(1.0f);
 		glm::mat4 projection = glm::mat4(1.0f);
-
+	
 		// note that we're translating the scene in the reverse direction of where we want to move
 		view = glm::lookAt(camera.getCameraPos(), camera.getCameraPos() + camera.getCameraFront(), camera.getCameraUp());
 		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
 
 		model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
+				
 		// pass projection matrix to shader (note that in this case it could change every frame)
 		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
 		cubeShader.setMat4("projection", projection);
@@ -260,10 +247,10 @@ int main() {
 		glBindVertexArray(VAO);
 		for (unsigned int i = 0; i < CUBE_COUNT; i++)
 		{
-			model = glm::mat4(1.0f);
-
+			glm::mat4 model = glm::mat4(1.0f);
+			
 			model = glm::translate(model, cubes[i][0]); //  c cubePositions[i]
-			float angle = 20.0f * (i + 1) * glm::sin(timeValue);
+			float angle = 20.0f * (i+1) * glm::sin(timeValue);
 			model = glm::rotate(model, glm::radians(angle), cubes[i][1]); // glm::vec3(1.0f, 0.3f, 0.5f)  // 
 			model = glm::scale(model, cubes[i][2]);
 
@@ -271,53 +258,6 @@ int main() {
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-
-		model = glm::mat4(1.0f);
-
-		if (timeValue - swapTime >= swapDelay)
-		{
-			currentAcceleration = glm::vec3(RandomRange(maxVal * -1, maxVal), RandomRange(maxVal * -1, maxVal), 0.0);
-			swapTime = timeValue;
-		}
-
-		glm::vec3 accelThisFrame = currentAcceleration;
-		glm::vec3 velThisFrame = currentVelocity;
-
-		if (heldPosition.x > borderValue)
-		{
-			accelThisFrame.x = glm::abs(accelThisFrame.x) * -2.0;
-			velThisFrame.x = velThisFrame.x / 1.2;
-		}
-		else if (heldPosition.x < -borderValue)
-		{
-			accelThisFrame.x = glm::abs(accelThisFrame.x) * 2.0;
-			velThisFrame.x = velThisFrame.x / 1.2;
-		}
-
-		if (heldPosition.y > borderValue)
-		{
-			accelThisFrame.y = glm::abs(accelThisFrame.y) * -2.0;
-			velThisFrame.y = velThisFrame.y / 1.2;
-		}
-		else if (heldPosition.y < -borderValue)
-		{
-			accelThisFrame.y = glm::abs(accelThisFrame.y) * 2.0;
-			velThisFrame.y = velThisFrame.y / 1.2;
-		}
-
-		currentVelocity = velThisFrame +accelThisFrame * deltaTime;
-
-		heldPosition += currentVelocity * deltaTime;
-
-		model = glm::translate(model, heldPosition); //  c cubePositions[i]
-		model = glm::scale(model, glm::vec3(1.0, 1.0, 1.0));
-		//float angle = 20.0f * (i + 1) * glm::sin(timeValue);
-		//model = glm::rotate(model, glm::radians(angle), cubes[i][1]); // glm::vec3(1.0f, 0.3f, 0.5f)  // 
-		//model = glm::scale(model, cubes[i][2]);
-
-		cubeShader.setMat4("model", model);
-
-		glDrawArrays(GL_TRIANGLES, 0, 36);
 
 		lightShader.use();
 

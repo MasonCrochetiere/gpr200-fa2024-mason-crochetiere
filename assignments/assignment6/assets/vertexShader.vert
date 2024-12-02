@@ -16,8 +16,8 @@ uniform mat4 projection;
 
 void main()
 {
-
-	//aPos.z = sin(aPos.x) / 2.0;
+	vec3 pos = aPos;
+	//pos.y += sin(uTime * 1.5 + pos.x) / 2.0;
 
 	gl_Position = projection * view * model * vec4(aPos, 1.0);
 //	Color = aColor; //Pass-through, just transferring information 
