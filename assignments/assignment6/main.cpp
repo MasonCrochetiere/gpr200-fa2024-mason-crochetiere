@@ -301,16 +301,15 @@ int main() {
 
 	meshSystem::MeshData cubeMeshData;
 	//meshSystem::generatePlane(5.0f, 5.0f, 32, &cubeMeshData);
+
 	meshSystem::generateCube(1.0f, &cubeMeshData);
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
+
+	ParticleSystem particleSystem(32, &lightShader, cubeMesh);
+
 	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &lightShader);
 
-	//int poolSize = 32;
-	//MemoryPool particlePool(32, sizeof(meshSystem::MeshRenderer));
-	//std::vector<MeshRenderer*> particleVec;
-
 	lightSystem::LightingSystem lightSystem(&lightShader);
-	ParticleSystem particleSystem(32, &cubeShader, cubeMesh);
 
 	lightSystem::PointLight myLight = lightSystem::PointLight();
 	lightSystem.AddPointLight(&myLight);
@@ -323,9 +322,9 @@ int main() {
 		// -----------------------------
 		glEnable(GL_DEPTH_TEST);
 
-		float timeValue = glfwGetTime();
-
 		// ---------------------------------- UPDATE TIME------------------------------------------\\
+		
+		float timeValue = glfwGetTime();
 
 		float currentFrame = static_cast<float>(glfwGetTime());
 		deltaTime = currentFrame - lastFrame;
@@ -336,7 +335,6 @@ int main() {
 		// -------------------------------------GET INPUT------------------------------------------\\
 
 		camera.processInput(window);
-
 
 		// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
 
@@ -468,9 +466,7 @@ int main() {
 
 		particleSystem.renderSystem();
 
-
 		lightShader.use();
-
 
 		viewLoc = glGetUniformLocation(lightShader.ID, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
