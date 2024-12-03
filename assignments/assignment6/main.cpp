@@ -334,6 +334,15 @@ int main() {
 
 		// -------------------------------------GET INPUT------------------------------------------\\
 
+		// Start drawing ImGUI
+		ImGui_ImplGlfw_NewFrame();
+		ImGui_ImplOpenGL3_NewFrame();
+		ImGui::NewFrame();
+
+		//if (&ImGui::GetIO().WantCaptureMouse))
+		//{
+				// theoretically this if solves the input issue but i'm not sure
+		//}
 		camera.processInput(window);
 
 		// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
@@ -361,68 +370,6 @@ int main() {
 			sphereMesh.draw(drawMode);
 		}
 		//sphereMesh.draw(drawMode);
-
-		//	// Start drawing ImGUI
-		ImGui_ImplGlfw_NewFrame();
-		ImGui_ImplOpenGL3_NewFrame();
-		ImGui::NewFrame();
-
-		//Create a window called Settings
-		ImGui::Begin("Settings");
-		ImGui::Text("Add Controls Here!");
-
-		ImGui::DragFloat3("Light Position", &myLight.position.x, 0.1f);
-		ImGui::ColorEdit3("Light Color", &myLight.color.r);
-		ImGui::SliderFloat("Ambient K", &myLight.ambient, 0.0f, 1.0f);
-		ImGui::SliderFloat("Diffuse K", &myLight.diffuse, 0.0f, 1.0f);
-		ImGui::SliderFloat("Specular K", &myLight.specular, 0.0f, 1.0f);
-
-		//Separate particle settings
-		ImGui::Checkbox("View Particle Settings", &seeParticleSettings);
-
-		if (seeParticleSettings)
-		{
-			ImGui::Checkbox("Transform!", &seeParticleTransform);
-			if (seeParticleTransform)
-			{
-				ImGui::Checkbox("Use Random Position!", &particleValues.useRandomPosition);
-				if (particleValues.useRandomPosition)
-				{
-					ImGui::DragFloat3("Position Min", &particleValues.randomPosMin.x, 1.0f);
-					ImGui::DragFloat3("Position Max", &particleValues.randomPosMax.x, 1.0f);
-				}
-				else
-				{
-					ImGui::DragFloat3("System Position", &particleValues.position.x, 1.0f);
-				}
-
-				ImGui::DragFloat3("System Rotation", &particleValues.rotation.x, 1.0f);
-				ImGui::DragFloat3("System Scale", &particleValues.scale.x, 1.0f);
-			}
-
-			ImGui::Checkbox("Velocity!", &seeParticleVelocity);
-			if (seeParticleVelocity)
-			{
-				ImGui::Checkbox("Use Random Velocity", &particleValues.useRandomVelocity);
-				ImGui::DragFloat3("Particle Velocity", &particleValues.particleVelocity.x, 0.1f);
-
-				if (particleValues.useRandomVelocity)
-				{
-					ImGui::DragFloat3("Random * Min", &particleValues.randomVelocityMin.x, 0.1f);
-					ImGui::DragFloat3("Random * Max", &particleValues.randomVelocityMax.x, 0.1f);
-				}
-
-				ImGui::Checkbox("Cos Velocity", &particleValues.cosVelocity);
-				ImGui::Checkbox("Sin Velocity", &particleValues.sinVelocity);
-			}
-
-			ImGui::Checkbox("Particle Spawn!", &seeParticleSpawn);
-			if (seeParticleSpawn)
-			{
-				ImGui::DragFloat("Time Between Spawns", &particleValues.timeBetweenSpawns);
-				ImGui::DragFloat("Particle Lifetime", &particleValues.particleLifetime);
-			}
-		}
 
 		cubeShader.setVec3("lightPos", lightPos);
 		cubeShader.setVec3("lightColor", lightColor);
@@ -491,6 +438,62 @@ int main() {
 		glBindVertexArray(0);
 		glDepthMask(GL_TRUE);
 		// ... draw the rest of the scene
+
+		//Create a window called Settings
+		ImGui::Begin("Settings");
+
+		ImGui::DragFloat3("Light Position", &myLight.position.x, 0.1f);
+		ImGui::ColorEdit3("Light Color", &myLight.color.r);
+		ImGui::SliderFloat("Ambient K", &myLight.ambient, 0.0f, 1.0f);
+		ImGui::SliderFloat("Diffuse K", &myLight.diffuse, 0.0f, 1.0f);
+		ImGui::SliderFloat("Specular K", &myLight.specular, 0.0f, 1.0f);
+
+		//Separate particle settings
+		ImGui::Checkbox("View Particle Settings", &seeParticleSettings);
+
+		if (seeParticleSettings)
+		{
+			ImGui::Checkbox("Transform!", &seeParticleTransform);
+			if (seeParticleTransform)
+			{
+				ImGui::Checkbox("Use Random Position!", &particleValues.useRandomPosition);
+				if (particleValues.useRandomPosition)
+				{
+					ImGui::DragFloat3("Position Min", &particleValues.randomPosMin.x, 1.0f);
+					ImGui::DragFloat3("Position Max", &particleValues.randomPosMax.x, 1.0f);
+				}
+				else
+				{
+					ImGui::DragFloat3("System Position", &particleValues.position.x, 1.0f);
+				}
+
+				ImGui::DragFloat3("System Rotation", &particleValues.rotation.x, 1.0f);
+				ImGui::DragFloat3("System Scale", &particleValues.scale.x, 1.0f);
+			}
+
+			ImGui::Checkbox("Velocity!", &seeParticleVelocity);
+			if (seeParticleVelocity)
+			{
+				ImGui::Checkbox("Use Random Velocity", &particleValues.useRandomVelocity);
+				ImGui::DragFloat3("Particle Velocity", &particleValues.particleVelocity.x, 0.1f);
+
+				if (particleValues.useRandomVelocity)
+				{
+					ImGui::DragFloat3("Random * Min", &particleValues.randomVelocityMin.x, 0.1f);
+					ImGui::DragFloat3("Random * Max", &particleValues.randomVelocityMax.x, 0.1f);
+				}
+
+				ImGui::Checkbox("Cos Velocity", &particleValues.cosVelocity);
+				ImGui::Checkbox("Sin Velocity", &particleValues.sinVelocity);
+			}
+
+			ImGui::Checkbox("Particle Spawn!", &seeParticleSpawn);
+			if (seeParticleSpawn)
+			{
+				ImGui::DragFloat("Time Between Spawns", &particleValues.timeBetweenSpawns);
+				ImGui::DragFloat("Particle Lifetime", &particleValues.particleLifetime);
+			}
+		}
 
 		glBindVertexArray(0);
 
