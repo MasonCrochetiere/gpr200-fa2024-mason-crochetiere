@@ -102,6 +102,8 @@ glm::mat4 lookAt(glm::vec3 camera, glm::vec3 target, glm::vec3 worldUp)
 	// called the graham-schmidt process
 
 	// creating basis vectors
+
+	return glm::mat4(1.0);
 }
 
 const char* vertexShaderSource = R"(

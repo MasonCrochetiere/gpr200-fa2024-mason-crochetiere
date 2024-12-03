@@ -471,84 +471,7 @@ int main() {
 			//	glDepthMask(GL_TRUE);
 			//	// ... draw the rest of the scene
 
-				// Start drawing ImGUI
-			ImGui_ImplGlfw_NewFrame();
-			ImGui_ImplOpenGL3_NewFrame();
-			ImGui::NewFrame();
-
-
-			//cubeShader.setVec3("lightPos", lightPos);
-			//cubeShader.setVec3("lightColor", lightColor);
-			litShader.setVec3("viewPos", camera.getCameraPos());
-
-			litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-			litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-			litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-			litShader.setFloat("material.shininess", 32.0f);
-
-			texture.Bind(GL_TEXTURE0);
-
-			glm::mat4 model = glm::mat4(1.0f);
-			glm::mat4 view = glm::mat4(1.0f);
-			glm::mat4 projection = glm::mat4(1.0f);
-
-			// note that we're translating the scene in the reverse direction of where we want to move
-			view = glm::lookAt(camera.getCameraPos(), camera.getCameraPos() + camera.getCameraFront(), camera.getCameraUp());
-			//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-			model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
-			// pass projection matrix to shader (note that in this case it could change every frame)
-			projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
-			litShader.setMat4("projection", projection);
-
-			// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-			litShader.setFloat("uTime", timeValue);
-
-			int viewLoc = glGetUniformLocation(litShader.ID, "view");
-			litShader.setMat4("view", view);
-
-			int projectionLoc = glGetUniformLocation(litShader.ID, "projection");
-			litShader.setMat4("projection", projection);
-			// same for View Matrix and Projection Matrix
-
-			glBindVertexArray(VAO);
-			bigCube.transform.position = myLight.position;
-			bigCube.transform.scale = glm::vec3(0.3f);
-			bigCube.modelAndDraw();
-
-			particleSystem.renderSystem();
-
-			lightShader.use();
-
-
-			viewLoc = glGetUniformLocation(lightShader.ID, "view");
-			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-			projectionLoc = glGetUniformLocation(lightShader.ID, "projection");
-			lightShader.setMat4("projection", projection);
-
-			model = glm::mat4(1.0f);
-			model = glm::translate(model, lightPos);
-			lightShader.setMat4("model", model);
-			lightShader.setVec3("lightColor", lightColor);
-
-			//glDrawArrays(GL_TRIANGLES, 0, 36);
-
-			glDepthMask(GL_FALSE);
-			skyboxShader.use();
-			skyboxShader.setMat4("view", view);
-			skyboxShader.setMat4("projection", projection);
-			glBindVertexArray(skyboxVAO);
-			glActiveTexture(GL_TEXTURE0);
-			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-			//	glDrawArrays(GL_TRIANGLES, 0, 36);
-			glBindVertexArray(0);
-			glDepthMask(GL_TRUE);
-			// ... draw the rest of the scene
-
-			glBindVertexArray(0);
-
-			// Start drawing ImGUI
+			//	// Start drawing ImGUI
 			ImGui_ImplGlfw_NewFrame();
 			ImGui_ImplOpenGL3_NewFrame();
 			ImGui::NewFrame();
@@ -609,6 +532,83 @@ int main() {
 					ImGui::DragFloat("Particle Lifetime", &particleValues.particleLifetime);
 				}
 			}
+
+			////cubeShader.setVec3("lightPos", lightPos);
+			////cubeShader.setVec3("lightColor", lightColor);
+			//litShader.setVec3("viewPos", camera.getCameraPos());
+
+			//litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+			//litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+			//litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+			//litShader.setFloat("material.shininess", 32.0f);
+
+			texture.Bind(GL_TEXTURE0);
+
+			glm::mat4 model = glm::mat4(1.0f);
+			glm::mat4 view = glm::mat4(1.0f);
+			glm::mat4 projection = glm::mat4(1.0f);
+
+			// note that we're translating the scene in the reverse direction of where we want to move
+			view = glm::lookAt(camera.getCameraPos(), camera.getCameraPos() + camera.getCameraFront(), camera.getCameraUp());
+			//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
+
+			model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+
+			// pass projection matrix to shader (note that in this case it could change every frame)
+			projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
+			litShader.setMat4("projection", projection);
+
+			// setting uniform values. probably want to get the vertex locations outside of update for efficiency
+			litShader.setFloat("uTime", timeValue);
+
+			int viewLoc = glGetUniformLocation(litShader.ID, "view");
+			litShader.setMat4("view", view);
+
+			int projectionLoc = glGetUniformLocation(litShader.ID, "projection");
+			litShader.setMat4("projection", projection);
+			// same for View Matrix and Projection Matrix
+
+			glBindVertexArray(VAO);
+			bigCube.transform.position = myLight.position;
+			bigCube.transform.scale = glm::vec3(0.3f);
+			bigCube.modelAndDraw();
+
+			particleSystem.renderSystem();
+
+
+			lightShader.use();
+
+
+			viewLoc = glGetUniformLocation(lightShader.ID, "view");
+			glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
+			projectionLoc = glGetUniformLocation(lightShader.ID, "projection");
+			lightShader.setMat4("projection", projection);
+
+			model = glm::mat4(1.0f);
+			model = glm::translate(model, lightPos);
+			lightShader.setMat4("model", model);
+			lightShader.setVec3("lightColor", lightColor);
+
+			//glDrawArrays(GL_TRIANGLES, 0, 36);
+
+			glDepthMask(GL_FALSE);
+			skyboxShader.use();
+			skyboxShader.setMat4("view", view);
+			skyboxShader.setMat4("projection", projection);
+			glBindVertexArray(skyboxVAO);
+			glActiveTexture(GL_TEXTURE0);
+			glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
+			//	glDrawArrays(GL_TRIANGLES, 0, 36);
+			glBindVertexArray(0);
+			glDepthMask(GL_TRUE);
+			// ... draw the rest of the scene
+
+			glBindVertexArray(0);
+
+			//// Start drawing ImGUI
+			//ImGui_ImplGlfw_NewFrame();
+			//ImGui_ImplOpenGL3_NewFrame();
+			//ImGui::NewFrame();
 
 			ImGui::End();
 

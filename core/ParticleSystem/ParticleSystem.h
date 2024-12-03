@@ -16,7 +16,7 @@
 class ParticleSystem : public Trackable
 {
 public:
-	ParticleSystem(int poolSize, Shader* newShader, Mesh mMesh);
+	ParticleSystem(int poolSize, Shader* newShader, meshSystem::Mesh mMesh);
 	~ParticleSystem();
 
 	void updateSystem(float currentTime, float deltaTime);
