@@ -426,22 +426,7 @@ int main() {
 
 			// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
 
-		//glActiveTexture(GL_TEXTURE1);
-		//glBindTexture(GL_TEXTURE_2D, skyBoxMap.getID());
-		//skyBoxMap.Bind(GL_TEXTURE0);
-
-		//glm::mat4 skyBoxModel = glm::mat4(1.0f);
-		//skyBoxModel = glm::translate(skyBoxModel, skyBox);
-		//float skySpin = 25.0f * timeValue;
-		////skyBoxModel = glm::rotate(skyBoxModel, glm::radians(skySpin), skyBoxSize);
-		//skyBoxModel = glm::scale(skyBoxModel, skyBoxSize);
-		//cubeShader.setMat4("model", skyBoxModel);
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
-
-
-
 			lightShader.use();
-
 
 			particleSystem.setSystemValues(particleValues);
 
@@ -458,18 +443,6 @@ int main() {
 
 			// be sure to activate the shader
 			litShader.use();
-
-			//	glDepthMask(GL_FALSE);
-			//	skyboxShader.use();
-			//	skyboxShader.setMat4("view", view);
-			//	skyboxShader.setMat4("projection", projection);
-			//	glBindVertexArray(skyboxVAO);-------------------------- I moved this section further down
-			//	glActiveTexture(GL_TEXTURE0);                           Because view and position aren't defined
-			//	glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);     up here.
-			////	glDrawArrays(GL_TRIANGLES, 0, 36);
-			//	glBindVertexArray(0);
-			//	glDepthMask(GL_TRUE);
-			//	// ... draw the rest of the scene
 
 			//	// Start drawing ImGUI
 			ImGui_ImplGlfw_NewFrame();
@@ -533,14 +506,14 @@ int main() {
 				}
 			}
 
-			////cubeShader.setVec3("lightPos", lightPos);
-			////cubeShader.setVec3("lightColor", lightColor);
-			//litShader.setVec3("viewPos", camera.getCameraPos());
+			cubeShader.setVec3("lightPos", lightPos);
+			cubeShader.setVec3("lightColor", lightColor);
+			litShader.setVec3("viewPos", camera.getCameraPos());
 
-			//litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-			//litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-			//litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-			//litShader.setFloat("material.shininess", 32.0f);
+			litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+			litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+			litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+			litShader.setFloat("material.shininess", 32.0f);
 
 			texture.Bind(GL_TEXTURE0);
 
