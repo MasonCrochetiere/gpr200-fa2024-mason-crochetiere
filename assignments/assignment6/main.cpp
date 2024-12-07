@@ -230,11 +230,9 @@ int main() {
 	glEnable(GL_DEPTH_TEST);
 
 	Texture2D texture("assets/cube.png", 0, 0);
-	Texture2D skyBoxMap("assets/skybox.jpg", 0, 0);
 
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
-
 
 	Shader cubeShader("assets/vertexShader.vert", "assets/litShader.frag");
 	Shader lightShader("assets/vertexShader.vert", "assets/unlitShader.frag");
@@ -304,7 +302,7 @@ int main() {
 	meshSystem::generateCube(1.0f, &cubeMeshData);
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
 
-	ParticleSystem particleSystem(32, &lightShader, cubeMesh);
+	ParticleSystem particleSystem(32, &cubeShader, cubeMesh);
 
 	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &lightShader);
 
@@ -338,10 +336,6 @@ int main() {
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui::NewFrame();
 
-		//if (&ImGui::GetIO().WantCaptureMouse))
-		//{
-				// theoretically this if solves the input issue but i'm not sure
-		//}
 		camera.processInput(window);
 
 		// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
@@ -354,11 +348,14 @@ int main() {
 
 		lightSystem.UpdateLighting(camera.getCameraPos());
 
-		// ---------RENDER LOGIC (So most of it because graphics programming LOL)------------------\\
-
 		//Clear framebuffer
 		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
+
+		// ---------RENDER LOGIC (So most of it because graphics programming LOL)------------------\\
+
+
+		// -------------------------------------RENDER SKYBOX 1----------------------------\\
 
 		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
 		skyboxShader.use();
@@ -369,6 +366,12 @@ int main() {
 			sphereMesh.draw(drawMode);
 		}
 		//sphereMesh.draw(drawMode);
+
+		glBindVertexArray(VAO);
+
+		// -------------------------------------RENDER PARTICLE SYSTEM----------------------------\\
+
+		cubeShader.use();
 
 		cubeShader.setVec3("lightPos", lightPos);
 		cubeShader.setVec3("lightColor", lightColor);
@@ -405,12 +408,9 @@ int main() {
 		cubeShader.setMat4("projection", projection);
 		// same for View Matrix and Projection Matrix
 
-		glBindVertexArray(VAO);
-		bigCube.transform.position = myLight.position;
-		bigCube.transform.scale = glm::vec3(0.3f);
-		bigCube.modelAndDraw();
-
 		particleSystem.renderSystem();
+
+		// -------------------------------------RENDER LIGHT CUBE----------------------------\\
 
 		lightShader.use();
 
@@ -424,7 +424,11 @@ int main() {
 		lightShader.setMat4("model", model);
 		lightShader.setVec3("lightColor", lightColor);
 
-		//glDrawArrays(GL_TRIANGLES, 0, 36);
+		bigCube.transform.position = myLight.position;
+		bigCube.transform.scale = glm::vec3(0.3f);
+		bigCube.modelAndDraw();
+
+		// -------------------------------------RENDER SKYBOX 2----------------------------\\
 
 		glDepthMask(GL_FALSE);
 		skyboxShader.use();
@@ -437,6 +441,8 @@ int main() {
 		glBindVertexArray(0);
 		glDepthMask(GL_TRUE);
 		// ... draw the rest of the scene
+
+		// -------------------------------------RENDER IMGUI----------------------------\\
 
 		//Create a window called Settings
 		ImGui::Begin("Settings");
@@ -496,16 +502,13 @@ int main() {
 
 		glBindVertexArray(0);
 
-		//// Start drawing ImGUI
-		//ImGui_ImplGlfw_NewFrame();
-		//ImGui_ImplOpenGL3_NewFrame();
-		//ImGui::NewFrame();
-
 		ImGui::End();
 
 		// Do the actual rendering with OpenGL
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+		// -------------------------------------COMPLETE DRAW----------------------------\\
 
 		//Drawing happens here!
 		glfwSwapBuffers(window);

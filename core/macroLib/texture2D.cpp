@@ -21,6 +21,9 @@ namespace macroLib {
 
 		stbi_set_flip_vertically_on_load(true);
 
+		//printf("Loading texture of path ");
+		//printf(filePath);
+
 		//int m_width, m_height, m_nrChannels;
 		unsigned char* data = stbi_load(filePath, &m_width, &m_height, &m_nrChannels, 0);// loading these ints with data from that file
 		if (data)
