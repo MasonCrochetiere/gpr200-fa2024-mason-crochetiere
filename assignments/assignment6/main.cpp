@@ -19,6 +19,7 @@
 #include <MeshSystem/mesh.h>
 #include <MeshSystem/meshGenerator.h>
 #include <MeshSystem/MeshRenderer.h>
+#include <MeshSystem/Model.h>
 
 #include "Lighting/LightingSystem.h"
 using namespace ew;
@@ -80,6 +81,9 @@ int main() {
 	Shader litShader("assets/defaultVertex.vert", "assets/litShader.frag");
 	Shader unlitShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
 
+
+	Model backpack("assets/3DModels/backpack/backpack.obj");
+
 	lightSystem::LightingSystem lightSystem = LightingSystem(&litShader);
 	lightSystem::PointLight cubeLight1 = PointLight();
 	lightSystem::PointLight cubeLight = PointLight();
@@ -95,6 +99,7 @@ int main() {
 	meshSystem::generatePlane(10.0f,10.0f,32, &planeMeshData);
 	meshSystem::generateCube(1.0f,&cubeMeshData);
 	meshSystem::Mesh planeMesh = meshSystem::Mesh(planeMeshData);
+	planeMesh.addTexture("assets/cube.png", "texture_diffuse");
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
 	meshSystem::MeshRenderer bigPlane = MeshRenderer(planeMesh,Transform(),&litShader);
 	bigPlane.transform.position = glm::vec3(-5.0f,-5.0f,0.0f);
@@ -140,8 +145,6 @@ int main() {
 		litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
 		litShader.setFloat("material.shininess", 32.0f);
 
-		texture.Bind(GL_TEXTURE0);
-
 
 		//calculate and set view and projection
 		glm::mat4 view = glm::mat4(1.0f);
@@ -156,6 +159,7 @@ int main() {
 		unlitShader.setMat4("projection", projection);
 		unlitShader.setVec3("color",glm::vec3(1.0f, 1.0f, 1.0f));
 
+		backpack.Draw(litShader);
 		bigPlane.modelAndDraw();
 		lightCube.modelAndDraw();
 		lightCube1.modelAndDraw();
@@ -170,6 +174,7 @@ int main() {
 		ImGui::Begin("Settings");
 		ImGui::Text("Add Controls Here!");
 
+		ImGui::DragFloat3("Model Position", &backpack.transform.position.x, 0.1f);
 		ImGui::DragFloat3("Light Position", &lightCube.transform.position.x, 0.1f);
 		ImGui::DragFloat3("Light Position1", &lightCube1.transform.position.x, 0.1f);
 		ImGui::ColorEdit3("Light Color", &cubeLight.color.r);

@@ -98,5 +98,32 @@ namespace meshSystem
             }
         }
     }
+    void generateTerrain(std::string filePath,MeshData *mesh)
+    {
+        int width, height, nChannels;
+        unsigned char *data = stbi_load("assets/iceland_heightmap.png",&width,&height,&nChannels,0);
+
+        // vertex generation
+        float yScale = 64.0f / 256.0f, yShift = 16.0f;  // apply a scale+shift to the height data
+
+        mesh->vertices.reserve(width * height * 3);
+
+        for (unsigned int i = 0; i < height; i++)
+        {
+            for (unsigned int j = 0; j < width; j++)
+            {
+                // retrieve texel for (i,j) tex coord
+                unsigned char* texel = data + (j + width * i) * nChannels;
+                // raw height at coordinate
+                unsigned char y = texel[0];
+
+                // vertex
+               // mesh->vertices.emplace_back(-height / 2.0f + i);        // v.x
+                //mesh->vertices.emplace_back((int)y * yScale - yShift); // v.y
+               // mesh->vertices.emplace_back(-width / 2.0f + j);        // v.z
+            }
+        }
+
+    }
 
 }

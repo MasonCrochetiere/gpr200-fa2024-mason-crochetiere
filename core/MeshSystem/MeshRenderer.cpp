@@ -28,7 +28,7 @@ namespace meshSystem {
 
         meshShader->use();
         meshShader->setMat4("model", model);
-        mesh.draw();
+        mesh.draw(*meshShader);
     }
 
 }

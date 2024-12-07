@@ -8,6 +8,13 @@
 #include "../ew/ewMath/ewMath.h"
 #include <glm/gtc/type_ptr.hpp>
 #include "../macroLib/texture2D.h"
+#include <string>
+#include <iostream>
+#include "../macroLib/shader.h"
+#include <assimp/Importer.hpp>   
+
+
+using namespace macroLib;
 
 using namespace ew;
 
@@ -23,9 +30,15 @@ namespace meshSystem
         Vertex(const glm::vec3& position,const glm::vec3& normal,const glm::vec2& uv):position(position),normal(normal),uv(uv){}
 
     };
+    struct Texture
+    {
+        unsigned int id;
+        std::string type;
+        std::string path;
+    };
     struct MeshData
     {
-        MeshData(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<macroLib::Texture2D> textures)
+        MeshData(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures)
         {
             this->vertices = vertices;
             this->indices = indices;
@@ -33,7 +46,7 @@ namespace meshSystem
         }
         std::vector<Vertex> vertices;
         std::vector<unsigned int> indices;
-        std::vector<macroLib::Texture2D> textures;
+        std::vector<Texture> textures;
         MeshData() = default;
     };
 
@@ -42,11 +55,13 @@ namespace meshSystem
         Mesh() = default;
         Mesh(const MeshData& meshData);
         void load(const MeshData& meshData);
-        void draw() const;
+        void draw(macroLib::Shader &shader) const;
+        void addTexture(std::string filePath,std::string type);
         int getVertexCount() const {return vertexCount;}
         int getIndiciesCount() const {return indicesCount;}
 
     private:
+        std::vector<Texture> textures;
         bool meshInitialized = false;
         unsigned int vaoRef = 0;
         unsigned int vboRef = 0;
