@@ -25,7 +25,7 @@ ParticleSystem::~ParticleSystem()
 	particleVec.clear();
 }
 
-void ParticleSystem::updateSystem(float currentTime, float deltaTime)
+void ParticleSystem::updateSystem(float currentTime, float deltaTime, glm::vec3 cameraPos)
 {
 	if (currentTime - lastParticleSpawn >= particleValues.timeBetweenSpawns)
 	{
@@ -45,8 +45,24 @@ void ParticleSystem::updateSystem(float currentTime, float deltaTime)
 
 	destroyQueuedParticles();
 
+	glm::vec3 avoidLoc = cameraPos;
+	glm::vec3 pVec;
+	float avoidRadius = 6.0f;
+	float avoidSpeed = 10.0f;
+
 	for (unsigned int i = 0; i < particleVec.size(); i++)
 	{
+		pVec = particleVec.at(i)->pRenderer->transform.position;
+		float dist = glm::distance(pVec, avoidLoc);
+
+		if (dist < avoidRadius)
+		{
+			// run away
+			glm::vec3 dir = glm::normalize(pVec - avoidLoc);
+			particleVec.at(i)->pRenderer->transform.position += dir * avoidSpeed * deltaTime;
+			//float dir = 
+		}
+
 		particleVec.at(i)->pRenderer->transform.position += (particleVec.at(i)->velocityOffset * particleValues.getVelocity(deltaTime, currentTime, particleVec.at(i)->getStartTime()));
 	}
 }

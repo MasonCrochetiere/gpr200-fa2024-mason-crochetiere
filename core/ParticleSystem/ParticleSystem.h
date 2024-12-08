@@ -19,7 +19,7 @@ public:
 	ParticleSystem(int poolSize, Shader* newShader, meshSystem::Mesh mMesh);
 	~ParticleSystem();
 
-	void updateSystem(float currentTime, float deltaTime);
+	void updateSystem(float currentTime, float deltaTime, glm::vec3 cameraPos);
 	void destroyQueuedParticles();
 	void renderSystem();
 	void setSystemValues(ParticleSystemValues values);

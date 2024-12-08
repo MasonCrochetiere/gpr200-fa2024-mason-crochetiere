@@ -229,7 +229,7 @@ int main() {
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
-	Texture2D texture("assets/cube.png", 0, 0);
+	Texture2D texture("assets/blankCube.png", 0, 0);
 
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
@@ -344,7 +344,7 @@ int main() {
 
 		particleSystem.setSystemValues(particleValues);
 
-		particleSystem.updateSystem(timeValue, deltaTime);
+		particleSystem.updateSystem(timeValue, deltaTime, camera.getCameraPos());
 
 		lightSystem.UpdateLighting(camera.getCameraPos());
 
