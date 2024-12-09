@@ -15,11 +15,6 @@ namespace meshSystem {
         meshShader = newShader;
     }
 
-    MeshRenderer::~MeshRenderer()
-    {
-
-    }
-
     //sets all the required vertex shader data, then draws the mesh (requires view and projection to be set, as well as the correct shader active)
     void MeshRenderer::modelAndDraw() {
         //setup model
@@ -33,7 +28,7 @@ namespace meshSystem {
 
         meshShader->use();
         meshShader->setMat4("model", model);
-        mesh.draw();
+        mesh.draw(*meshShader);
     }
 
 }

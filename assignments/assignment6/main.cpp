@@ -3,7 +3,6 @@
 #include <iostream>
 
 #include <ew/external/glad.h>
-#include <ew/procGen.h>
 #include <ew/ewMath/ewMath.h>
 #include <GLFW/glfw3.h>
 
@@ -23,6 +22,7 @@
 #include <MeshSystem/mesh.h>
 #include <MeshSystem/meshGenerator.h>
 #include <MeshSystem/MeshRenderer.h>
+#include <MeshSystem/Model.h>
 
 #include <ParticleSystem/MemoryPool.h>
 #include <ParticleSystem/ParticleSystem.h>
@@ -234,50 +234,21 @@ int main() {
 	//Texture2D texture1("assets/brickTexture.png", 0, 0);
 	//Texture2D texture2("assets/awesomeface.png", 0, 0);
 
-	Shader cubeShader("assets/vertexShader.vert", "assets/litShader.frag");
-	Shader lightShader("assets/vertexShader.vert", "assets/unlitShader.frag");
+	Shader unlitShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
+	Shader litShader("assets/defaultVertex.vert", "assets/litShader.frag");
 	Shader skyboxShader("assets/skyboxVert.vert", "assets/skyboxFrag.frag");
 	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
 
 
-	unsigned int skyboxVAO, skyboxVBO;
-	glGenVertexArrays(1, &skyboxVAO);
-	glGenBuffers(1, &skyboxVBO);
-	glBindVertexArray(skyboxVAO);
-	glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
 
+	meshSystem::MeshData planeMeshData;
+	meshSystem::generateTerrain("assets/iceland_heightmap.png", 256, &planeMeshData);
+	meshSystem::Mesh planeMesh = meshSystem::Mesh(planeMeshData);
+	planeMesh.addTexture("assets/grass.jpg", "texture_diffuse");
+	meshSystem::MeshRenderer terrain = MeshRenderer(planeMesh, Transform(), &litShader);
+	terrain.transform.position = glm::vec3(-1000, -50, -1000);
 
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-
-	//Initialization goes here!
-	unsigned int VBO;
-	glGenBuffers(1, &VBO); // populates VBO with the next available buffer indicator
-	glBindBuffer(GL_ARRAY_BUFFER, VBO); // sets the buffer to mess with to be VBO
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW); // so this transfers vertex data from CPU to GPU?
-
-	// position (getting XYZ)
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	// telling GPU when to jump in data (how many bytes slash floats) to get to each vertex
-	glEnableVertexAttribArray(0);
-
-	// color (getting RGBA)
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 3));
-	// same as above function. the final parameter is the offset (in bytes) to retrieve the data
-	glEnableVertexAttribArray(1);
-
-	// setting Normals
-	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)(sizeof(float) * 5));
-	// same as above.
-	glEnableVertexAttribArray(2);
-
-	//glm::vec3 skyBox(0.0, 0.0, 0.0);
-	//glm::vec3 skyBoxSize(100.f, 100.f, 100.f);
+	meshSystem::Model backpack = meshSystem::Model("assets/3DModels/backpack/backpack.obj");
 
 	std::vector<std::string> faces
 	{
@@ -292,9 +263,10 @@ int main() {
 
 
 	// initializing the sphere
-	ew::MeshData sphereMeshData;
-	ew::createSphere(100.0f, 256, &sphereMeshData);
-	ew::Mesh sphereMesh = ew::Mesh(sphereMeshData);
+	meshSystem::MeshData sphereMeshData;
+	meshSystem::createSphere(800.0f, 256, &sphereMeshData);
+	meshSystem::Mesh sphereMesh = meshSystem::Mesh(sphereMeshData);
+	meshSystem::MeshRenderer sphereRenderer = meshSystem::MeshRenderer(sphereMesh, &skyboxShader);
 
 	meshSystem::MeshData cubeMeshData;
 	//meshSystem::generatePlane(5.0f, 5.0f, 32, &cubeMeshData);
@@ -302,14 +274,16 @@ int main() {
 	meshSystem::generateCube(1.0f, &cubeMeshData);
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
 
-	ParticleSystem particleSystem(32, &cubeShader, cubeMesh);
+	ParticleSystem particleSystem(32, &litShader, cubeMesh);
 
-	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &lightShader);
+	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &litShader);
 
-	lightSystem::LightingSystem lightSystem(&lightShader);
+	lightSystem::LightingSystem lightSystem(&litShader);
 
 	lightSystem::PointLight myLight = lightSystem::PointLight();
+	lightSystem::DirectionLight dirLight = lightSystem::DirectionLight();
 	lightSystem.AddPointLight(&myLight);
+	lightSystem.AddDirectionLight(&dirLight);
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -340,7 +314,7 @@ int main() {
 
 		// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
 
-		lightShader.use();
+		litShader.use();
 
 		particleSystem.setSystemValues(particleValues);
 
@@ -357,32 +331,30 @@ int main() {
 
 		// -------------------------------------RENDER SKYBOX 1----------------------------\\
 
-		ew::DrawMode drawMode = pointRender ? ew::DrawMode::POINTS : ew::DrawMode::TRIANGLES;
 		skyboxShader.use();
 		{
 			glm::mat4 sphereSpin = glm::mat4(1);
 			sphereSpin = glm::rotate(sphereSpin, timeValue * glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			skyboxShader.setMat4("model", sphereSpin);
-			sphereMesh.draw(drawMode);
+			sphereRenderer.modelAndDraw();
 		}
-		//sphereMesh.draw(drawMode);
 
-		glBindVertexArray(VAO);
+
 
 		// -------------------------------------RENDER PARTICLE SYSTEM----------------------------\\
 
-		cubeShader.use();
+		litShader.use();
 
-		cubeShader.setVec3("lightPos", lightPos);
-		cubeShader.setVec3("lightColor", lightColor);
-		cubeShader.setVec3("viewPos", camera.getCameraPos());
+		litShader.setVec3("lightPos", lightPos);
+		litShader.setVec3("lightColor", lightColor);
+		litShader.setVec3("viewPos", camera.getCameraPos());
 
-		cubeShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-		cubeShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-		cubeShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-		cubeShader.setFloat("material.shininess", 32.0f);
+		litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+		litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+		litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+		litShader.setFloat("material.shininess", 32.0f);
 
-		texture.Bind(GL_TEXTURE0);
+
 
 		glm::mat4 model = glm::mat4(1.0f);
 		glm::mat4 view = glm::mat4(1.0f);
@@ -396,50 +368,45 @@ int main() {
 
 		// pass projection matrix to shader (note that in this case it could change every frame)
 		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
-		cubeShader.setMat4("projection", projection);
+		litShader.setMat4("projection", projection);
 
 		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-		cubeShader.setFloat("uTime", timeValue);
+		litShader.setFloat("uTime", timeValue);
 
-		int viewLoc = glGetUniformLocation(cubeShader.ID, "view");
-		cubeShader.setMat4("view", view);
+		int viewLoc = glGetUniformLocation(litShader.ID, "view");
+		litShader.setMat4("view", view);
 
-		int projectionLoc = glGetUniformLocation(cubeShader.ID, "projection");
-		cubeShader.setMat4("projection", projection);
+		int projectionLoc = glGetUniformLocation(litShader.ID, "projection");
+		litShader.setMat4("projection", projection);
 		// same for View Matrix and Projection Matrix
 
 		particleSystem.renderSystem();
 
 		// -------------------------------------RENDER LIGHT CUBE----------------------------\\
 
-		lightShader.use();
+		litShader.use();
+		terrain.modelAndDraw();
+		backpack.Draw(litShader);
 
-		viewLoc = glGetUniformLocation(lightShader.ID, "view");
+		viewLoc = glGetUniformLocation(litShader.ID, "view");
 		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-		projectionLoc = glGetUniformLocation(lightShader.ID, "projection");
-		lightShader.setMat4("projection", projection);
+		projectionLoc = glGetUniformLocation(litShader.ID, "projection");
+		litShader.setMat4("projection", projection);
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightPos);
-		lightShader.setMat4("model", model);
-		lightShader.setVec3("lightColor", lightColor);
+		litShader.setMat4("model", model);
+		litShader.setVec3("lightColor", lightColor);
 
 		bigCube.transform.position = myLight.position;
 		bigCube.transform.scale = glm::vec3(0.3f);
 		bigCube.modelAndDraw();
 
 		// -------------------------------------RENDER SKYBOX 2----------------------------\\
-
-		glDepthMask(GL_FALSE);
+		
 		skyboxShader.use();
 		skyboxShader.setMat4("view", view);
 		skyboxShader.setMat4("projection", projection);
-		glBindVertexArray(skyboxVAO);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_CUBE_MAP, cubemapTexture);
-		//	glDrawArrays(GL_TRIANGLES, 0, 36);
-		glBindVertexArray(0);
-		glDepthMask(GL_TRUE);
 		// ... draw the rest of the scene
 
 		// -------------------------------------RENDER IMGUI----------------------------\\
@@ -447,6 +414,7 @@ int main() {
 		//Create a window called Settings
 		ImGui::Begin("Settings");
 
+		ImGui::ColorEdit3("dirLight Color", &dirLight.color.r);
 		ImGui::DragFloat3("Light Position", &myLight.position.x, 0.1f);
 		ImGui::ColorEdit3("Light Color", &myLight.color.r);
 		ImGui::SliderFloat("Ambient K", &myLight.ambient, 0.0f, 1.0f);

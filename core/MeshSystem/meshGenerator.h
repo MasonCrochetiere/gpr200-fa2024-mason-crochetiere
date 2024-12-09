@@ -15,6 +15,8 @@ using namespace ew;
 namespace meshSystem {
     void generateCube(float size, MeshData* meshData);
     void generatePlane(float width,float height, int subDivisions, MeshData* meshData);
+    void createSphere(float radius, int subDivisions, MeshData* meshData);
+    void generateTerrain(std::string filePath,int subDivisions, MeshData *meshData);
 }
 
 
