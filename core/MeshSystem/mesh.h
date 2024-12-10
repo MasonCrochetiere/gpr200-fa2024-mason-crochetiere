@@ -56,7 +56,7 @@ namespace meshSystem
         Mesh(const MeshData& meshData);
         void load(const MeshData& meshData);
         void draw(macroLib::Shader &shader) const;
-        void addTexture(std::string filePath,std::string type);
+        void addTexture(std::string filePath,std::string type,macroLib::Shader &shader);
         int getVertexCount() const {return vertexCount;}
         int getIndiciesCount() const {return indicesCount;}
 

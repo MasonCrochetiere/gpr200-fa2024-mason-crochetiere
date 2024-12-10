@@ -48,13 +48,14 @@ namespace lightSystem {
     class LightingSystem {
     public:
         LightingSystem() = default;
-        LightingSystem(macroLib::Shader* shader);
+        LightingSystem(macroLib::Shader* newShader);
         void UpdateLighting(glm::vec3 viewPos);
         void AddDirectionLight(DirectionLight *directionLight);
         void AddPointLight(PointLight *pointLight);
         void AddSpotLight(SpotLight *spotLight);
+        void AddShader(macroLib::Shader* newShader);
     private:
-        macroLib::Shader *shader;
+        std::vector<macroLib::Shader*> shaders;
         std::vector<DirectionLight*> directionLights;
         std::vector<PointLight*> pointLights;
         std::vector<SpotLight*> spotLights;

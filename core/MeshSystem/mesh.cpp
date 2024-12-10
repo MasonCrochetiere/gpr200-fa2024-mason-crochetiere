@@ -67,6 +67,7 @@ namespace meshSystem {
     //draws the mesh
     void Mesh::draw(macroLib::Shader &shader) const
     {
+        shader.use();
         // bind appropriate textures
         unsigned int diffuseNr = 1;
         unsigned int specularNr = 1;
@@ -103,14 +104,15 @@ namespace meshSystem {
     }
 
 
-    //adds a new texture to mesh
+    //adds a new texture to mes
     //types are:
     //texture_diffuse
     //texture_specular
     //texture_normal
     //texture_height
-    void Mesh::addTexture(std::string filePath,std::string type)
+    void Mesh::addTexture(std::string filePath,std::string type,macroLib::Shader &shader)
     {
+        shader.use();
         Texture texture;
         texture.id = TextureFromFile(filePath,false);
         texture.type = type;

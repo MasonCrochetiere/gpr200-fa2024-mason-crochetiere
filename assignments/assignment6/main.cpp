@@ -242,11 +242,11 @@ int main() {
 
 
 	meshSystem::MeshData planeMeshData;
-	meshSystem::generateTerrain("assets/iceland_heightmap.png", 256, &planeMeshData);
+	meshSystem::generatePlane(10,10,256, &planeMeshData);
 	meshSystem::Mesh planeMesh = meshSystem::Mesh(planeMeshData);
-	planeMesh.addTexture("assets/grass.jpg", "texture_diffuse");
+	planeMesh.addTexture("assets/grass.png", "texture_diffuse",litShader);
 	meshSystem::MeshRenderer terrain = MeshRenderer(planeMesh, Transform(), &litShader);
-	terrain.transform.position = glm::vec3(-1000, -50, -1000);
+	//terrain.transform.position = glm::vec3(-1000, -50, -1000);
 
 	meshSystem::Model backpack = meshSystem::Model("assets/3DModels/backpack/backpack.obj");
 
@@ -333,7 +333,7 @@ int main() {
 
 		skyboxShader.use();
 		{
-			glm::mat4 sphereSpin = glm::mat4(1);
+			glm::mat4 sphereSpin = glm::mat4(1.0f);
 			sphereSpin = glm::rotate(sphereSpin, timeValue * glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 			skyboxShader.setMat4("model", sphereSpin);
 			sphereRenderer.modelAndDraw();
@@ -373,25 +373,24 @@ int main() {
 		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
 		litShader.setFloat("uTime", timeValue);
 
+		// same for View Matrix and Projection Matrix
+
+		particleSystem.renderSystem();
+
+
+
 		int viewLoc = glGetUniformLocation(litShader.ID, "view");
 		litShader.setMat4("view", view);
 
 		int projectionLoc = glGetUniformLocation(litShader.ID, "projection");
 		litShader.setMat4("projection", projection);
-		// same for View Matrix and Projection Matrix
-
-		particleSystem.renderSystem();
 
 		// -------------------------------------RENDER LIGHT CUBE----------------------------\\
 
-		litShader.use();
 		terrain.modelAndDraw();
 		backpack.Draw(litShader);
+		litShader.use();
 
-		viewLoc = glGetUniformLocation(litShader.ID, "view");
-		glUniformMatrix4fv(viewLoc, 1, GL_FALSE, &view[0][0]);
-		projectionLoc = glGetUniformLocation(litShader.ID, "projection");
-		litShader.setMat4("projection", projection);
 
 		model = glm::mat4(1.0f);
 		model = glm::translate(model, lightPos);

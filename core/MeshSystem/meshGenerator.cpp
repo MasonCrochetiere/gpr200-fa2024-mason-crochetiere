@@ -70,8 +70,8 @@ namespace meshSystem
                 uv.y = ((float)row / subDivisions);
                 glm::vec3 pos;
                 pos.x = uv.x * width;
-                pos.y = uv.y * height;
-                pos.z = 0;
+                pos.y = 0;
+                pos.z = uv.y * height;
                 glm::vec3 normal = glm::vec3(0,0,1);
                 mesh->vertices.emplace_back(pos,normal,uv);
             }
@@ -98,69 +98,7 @@ namespace meshSystem
             }
         }
     }
-    void generateTerrain(std::string filePath,int subDivisions, MeshData *mesh)
-    {
-        int width, height, nChannels;
-        unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &nChannels, 0);
-        std::cout << std::endl << "start" << std::endl;
-
-        //clear meshdata
-        mesh->vertices.clear();
-        mesh->indices.clear();
-
-        //allocate needed space
-        mesh->vertices.reserve((subDivisions + 1) * (subDivisions + 1));
-        mesh->indices.reserve(subDivisions * subDivisions * 6);
-
-        float subDivisionScalingX = (float)(width / subDivisions);
-        float subDivisionScalingY = (float)(height / subDivisions);
-        //set vertices and uv
-        for (unsigned int row = 0; row <= subDivisions; row++)
-        {
-            for (unsigned int col = 0; col <= subDivisions; col++)
-            {
-                // retrieve texel for (i,j) tex coord
-                
-                float xDist = col * subDivisionScalingX;
-                float yDist = row * subDivisionScalingY;
-                unsigned char* texel = data + ((int)xDist + width * (int)yDist) * nChannels;
-                // raw height at coordinate
-                unsigned char y = texel[0];
-                //std::cout << col << std::endl;
-
-                glm::vec2 uv;
-                uv.x = ((float)col / subDivisions / 4);
-                uv.y = ((float)row / subDivisions / 4);
-                glm::vec3 pos;
-                pos.x = ((float)col / subDivisions) * width;
-                pos.y = (int)y / 2;
-                pos.z = ((float)row / subDivisions) * height;
-                glm::vec3 normal = glm::vec3(0, 0, 1);
-                mesh->vertices.emplace_back(pos, normal, uv);
-            }
-        }
-
-        //set indices
-        for (size_t row = 0; row < subDivisions; row++)
-        {
-            for (size_t col = 0; col < subDivisions; col++)
-            {
-                unsigned int bottomLeft = row * (subDivisions + 1) + col;
-                unsigned int bottomRight = bottomLeft + 1;
-                unsigned int topLeft = bottomLeft + subDivisions + 1;
-                unsigned int topRight = topLeft + 1;
-
-                //triangle 1
-                mesh->indices.emplace_back(bottomLeft);
-                mesh->indices.emplace_back(bottomRight);
-                mesh->indices.emplace_back(topRight);
-                //triangle 2
-                mesh->indices.emplace_back(topRight);
-                mesh->indices.emplace_back(topLeft);
-                mesh->indices.emplace_back(bottomLeft);
-            }
-        }
-    }
+   
     void createSphere(float radius, int subDivisions, MeshData* mesh)
     {
         mesh->vertices.clear();
