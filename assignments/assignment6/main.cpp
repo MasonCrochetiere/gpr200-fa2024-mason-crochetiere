@@ -407,6 +407,7 @@ int main() {
 		skyboxShader.use();
 		skyboxShader.setMat4("view", view);
 		skyboxShader.setMat4("projection", projection);
+		skyboxShader.setFloat("uTime", timeValue);
 		// ... draw the rest of the scene
 
 		// -------------------------------------RENDER IMGUI----------------------------\\

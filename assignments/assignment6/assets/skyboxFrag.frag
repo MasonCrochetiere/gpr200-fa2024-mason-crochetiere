@@ -8,7 +8,7 @@ in vec3 FragPos;
 in vec3 textureDir;
 
 uniform sampler2D ourTexture;
-uniform float uTime = 1.0;
+uniform float uTime;
 uniform samplerCube skybox;
 
 void main()
