@@ -23,7 +23,7 @@ add_library(core STATIC ${CORE_SRC} ${CORE_INC} "macroLib/shader.h" "macroLib/sh
         MeshSystem/MeshRenderer.cpp
         MeshSystem/MeshRenderer.h "ParticleSystem/MemoryPool.cpp" "ParticleSystem/MemoryPool.h" "ParticleSystem/ParticleSystem.h" "ParticleSystem/ParticleSystem.cpp" "ParticleSystem/Particle.cpp" "ParticleSystem/Particle.h" "ParticleSystem/ParticleSystemValues.h" "ParticleSystem/ParticleSystemValues.cpp"
         Lighting/LightingSystem.cpp
-        Lighting/LightingSystem.h "MeshSystem/Model.h" "MeshSystem/Model.cpp")
+        Lighting/LightingSystem.h "MeshSystem/Model.h" "MeshSystem/Model.cpp" "macroLib/shaderSystem.h" "macroLib/shaderSystem.cpp" )
 
 find_package(OpenGL REQUIRED)
 

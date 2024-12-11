@@ -37,6 +37,10 @@ namespace macroLib
         glm::vec3 getCameraUp() { return cameraUp; }
 
         float getFOV() { return fov; }
+
+
+        const float NEAR_PLANE = 0.1f;
+        const float FAR_PLANE = 1000.0f;
     private:
         bool firstMouse = true;
 
@@ -56,6 +60,8 @@ namespace macroLib
         glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
         glm::vec3 cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
         glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+        
     };
 }
 

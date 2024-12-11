@@ -17,7 +17,9 @@
 #include <macroLib/shader.h>
 #include <macroLib/texture2D.h>
 #include <macroLib/camera.h>
+#include <macroLib/shaderSystem.h>
 
+#include "Skybox/skybox.h"
 
 #include <MeshSystem/mesh.h>
 #include <MeshSystem/meshGenerator.h>
@@ -38,25 +40,14 @@ using namespace std;
 using namespace ew;
 using namespace macroLib;
 using namespace meshSystem;
+using namespace skybox;
 
 const int SCREEN_WIDTH = 1080;
 const int SCREEN_HEIGHT = 720;
-const int CUBE_COUNT = 20;
-
-const float NEAR_PLANE = 0.1f;
-const float FAR_PLANE = 1000.0f;
 
 // timing
 float deltaTime = 0.0f;	// time between current frame and last frame
 float lastFrame = 0.0f;
-
-glm::vec3 lightPos(1.2f, 1.0f, 2.0f);
-glm::vec3 lightColor(0.5f, 0.5f, 0.5f);
-
-float ambientK = 0.1f;
-float diffuseK = 1.0f;
-float specularK = 0.08f;
-float shininess = 2.0f;
 
 
 bool seeParticleSettings;
@@ -66,106 +57,6 @@ bool seeParticleSpawn;
 
 ParticleSystemValues particleValues;
 
-float radius = 5.0f;
-int numSegments = 8;
-bool pointRender = false;
-
-
-
-float vertices[] = {
-	//  X      Y      Z      U     V     NX     NY     NZ
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  0.0f, -1.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,  0.0f,  0.0f, -1.0f,
-
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 1.0f,  0.0f,  0.0f, 1.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  0.0f, 1.0f,
-
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  1.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  1.0f, 0.0f, -1.0f,  0.0f,  0.0f,
-
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  1.0f,  0.0f,  0.0f,
-
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f, -0.5f,  1.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-	 0.5f, -0.5f,  0.5f,  1.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f,  0.5f,  0.0f, 0.0f,  0.0f, -1.0f,  0.0f,
-	-0.5f, -0.5f, -0.5f,  0.0f, 1.0f,  0.0f, -1.0f,  0.0f,
-
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f, -0.5f,  1.0f, 1.0f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-	 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f,  0.5f,  0.0f, 0.0f,  0.0f,  1.0f,  0.0f,
-	-0.5f,  0.5f, -0.5f,  0.0f, 1.0f,  0.0f,  1.0f,  0.0f
-};
-
-unsigned int indices[] = {  // note that we start from 0!
-	0, 1, 3,   // first triangle
-	1, 2, 3    // second triangle
-};
-
-float skyboxVertices[] = {
-	// positions          
-	-100.0f,  100.0f, -100.0f,
-	-100.0f, -100.0f, -100.0f,
-	 100.0f, -100.0f, -100.0f,
-	 100.0f, -100.0f, -100.0f,
-	 100.0f,  100.0f, -100.0f,
-	-100.0f,  100.0f, -100.0f,
-
-	-100.0f, -100.0f,  100.0f,
-	-100.0f, -100.0f, -100.0f,
-	-100.0f,  100.0f, -100.0f,
-	-100.0f,  100.0f, -100.0f,
-	-100.0f,  100.0f,  100.0f,
-	-100.0f, -100.0f,  100.0f,
-
-	 100.0f, -100.0f, -100.0f,
-	 100.0f, -100.0f,  100.0f,
-	 100.0f,  100.0f,  100.0f,
-	 100.0f,  100.0f,  100.0f,
-	 100.0f,  100.0f, -100.0f,
-	 100.0f, -100.0f, -100.0f,
-
-	-100.0f, -100.0f,  100.0f,
-	-100.0f,  100.0f,  100.0f,
-	 100.0f,  100.0f,  100.0f,
-	 100.0f,  100.0f,  100.0f,
-	 100.0f, -100.0f,  100.0f,
-	-100.0f, -100.0f,  100.0f,
-
-	-100.0f,  100.0f, -100.0f,
-	 100.0f,  100.0f, -100.0f,
-	 100.0f,  100.0f,  100.0f,
-	 100.0f,  100.0f,  100.0f,
-	-100.0f,  100.0f,  100.0f,
-	-100.0f,  100.0f, -100.0f,
-
-	-100.0f, -100.0f, -100.0f,
-	-100.0f, -100.0f,  100.0f,
-	 100.0f, -100.0f, -100.0f,
-	 100.0f, -100.0f, -100.0f,
-	-100.0f, -100.0f,  100.0f,
-	 100.0f, -100.0f,  100.0f
-};
 
 
 unsigned int loadCubemap(std::vector<std::string> faces)
@@ -229,24 +120,21 @@ int main() {
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
-	Texture2D texture("assets/blankCube.png", 0, 0);
-
-	//Texture2D texture1("assets/brickTexture.png", 0, 0);
-	//Texture2D texture2("assets/awesomeface.png", 0, 0);
-
 	Shader unlitShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
 	Shader litShader("assets/defaultVertex.vert", "assets/litShader.frag");
 	Shader skyboxShader("assets/skyboxVert.vert", "assets/skyboxFrag.frag");
-	//Shader bgShader("assets/vertexShaderBG.vert", "assets/fragmentShaderBG.frag");
+	ShaderSystem shaderSystem = ShaderSystem(&camera);
+	shaderSystem.AddShader(&unlitShader);
+	shaderSystem.AddShader(&litShader);
+	shaderSystem.AddShader(&skyboxShader);
 
-
+	skybox::Skybox skybox(&skyboxShader);
 
 	meshSystem::MeshData planeMeshData;
 	meshSystem::generatePlane(10,10,256, &planeMeshData);
 	meshSystem::Mesh planeMesh = meshSystem::Mesh(planeMeshData);
 	planeMesh.addTexture("assets/grass.png", "texture_diffuse",litShader);
 	meshSystem::MeshRenderer terrain = MeshRenderer(planeMesh, Transform(), &litShader);
-	//terrain.transform.position = glm::vec3(-1000, -50, -1000);
 
 	meshSystem::Model backpack = meshSystem::Model("assets/3DModels/backpack/backpack.obj");
 
@@ -260,6 +148,7 @@ int main() {
 		"assets/skybox/newBack.png"
 	};
 	unsigned int cubemapTexture = loadCubemap(faces);
+
 
 
 	// initializing the sphere
@@ -287,14 +176,17 @@ int main() {
 
 	particleSystem.setLightingSystemRef(&lightSystem);
 
+
+	litShader.use();
+
+	litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+	litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+	litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+	litShader.setFloat("material.shininess", 32.0f);
+
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
-
-		// configure global opengl state
-		// -----------------------------
-		glEnable(GL_DEPTH_TEST);
-
 		// ---------------------------------- UPDATE TIME------------------------------------------\\
 		
 		float timeValue = glfwGetTime();
@@ -304,6 +196,11 @@ int main() {
 		lastFrame = currentFrame;
 
 		camera.updateTime(deltaTime);
+
+
+		//Clear framebuffer
+		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
 		// -------------------------------------GET INPUT------------------------------------------\\
 
@@ -321,79 +218,29 @@ int main() {
 
 		particleSystem.updateSystem(timeValue, deltaTime, camera.getCameraPos());
 
-		litShader.use();
-
 		lightSystem.UpdateLighting(camera.getCameraPos());
 
-		//Clear framebuffer
-		glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
-		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // also clear the depth buffer now!
 
 		// ---------RENDER LOGIC (So most of it because graphics programming LOL)------------------\\
 
 
 		// -------------------------------------RENDER SKYBOX 1----------------------------\\
 
-		skyboxShader.use();
-		{
-			glm::mat4 sphereSpin = glm::mat4(1.0f);
-			sphereSpin = glm::rotate(sphereSpin, timeValue * glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 1.0f));
-			skyboxShader.setMat4("model", sphereSpin);
-			sphereRenderer.modelAndDraw();
-		}
+		skybox.Render(timeValue);
+		
 
 
 
 		// -------------------------------------RENDER PARTICLE SYSTEM----------------------------\\
 
-		litShader.use();
-
-		litShader.setVec3("lightPos", lightPos);
-		litShader.setVec3("lightColor", lightColor);
-		litShader.setVec3("viewPos", camera.getCameraPos());
-
-		litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-		litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-		litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-		litShader.setFloat("material.shininess", 32.0f);
 
 
 
-		glm::mat4 model = glm::mat4(1.0f);
-		glm::mat4 view = glm::mat4(1.0f);
-		glm::mat4 projection = glm::mat4(1.0f);
 
-		// note that we're translating the scene in the reverse direction of where we want to move
-		view = glm::lookAt(camera.getCameraPos(), camera.getCameraPos() + camera.getCameraFront(), camera.getCameraUp());
-		//view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
-
-		model = glm::rotate(model, timeValue * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
-
-		// pass projection matrix to shader (note that in this case it could change every frame)
-		projection = glm::perspective(glm::radians(camera.getFOV()), (float)SCREEN_WIDTH / (float)SCREEN_HEIGHT, NEAR_PLANE, FAR_PLANE);
-		litShader.setMat4("projection", projection);
-
-		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-		litShader.setFloat("uTime", timeValue);
-
-		// same for View Matrix and Projection Matrix
+		shaderSystem.UpdateShaders(timeValue, SCREEN_WIDTH, SCREEN_HEIGHT);
 
 		particleSystem.renderSystem();
 
-
-		litShader.use();
-
-
-		int viewLoc = glGetUniformLocation(litShader.ID, "view");
-		litShader.setMat4("view", view);
-
-		unlitShader.use();
-		unlitShader.setMat4("projection", projection);
-
-		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
-		unlitShader.setFloat("uTime", timeValue);
-
-		unlitShader.setMat4("view", view);
 
 		// -------------------------------------RENDER LIGHT CUBE----------------------------\\
 
@@ -403,18 +250,8 @@ int main() {
 		litShader.use();
 
 
-		model = glm::mat4(1.0f);
-		model = glm::translate(model, lightPos);
-		litShader.setMat4("model", model);
-		litShader.setVec3("lightColor", lightColor);
-
 		// -------------------------------------RENDER SKYBOX 2----------------------------\\
-		
-		skyboxShader.use();
-		skyboxShader.setMat4("view", view);
-		skyboxShader.setMat4("projection", projection);
-		skyboxShader.setFloat("uTime", timeValue / 10.0f);
-		// ... draw the rest of the scene
+
 
 		// -------------------------------------RENDER IMGUI----------------------------\\
 
