@@ -64,6 +64,8 @@ void ParticleSystem::updateSystem(float currentTime, float deltaTime, glm::vec3 
 		}
 
 		particleVec.at(i)->pRenderer->transform.position += (particleVec.at(i)->velocityOffset * particleValues.getVelocity(deltaTime, currentTime, particleVec.at(i)->getStartTime()));
+
+		particleVec.at(i)->updateParticle();
 	}
 }
 
@@ -129,6 +131,8 @@ void ParticleSystem::addParticle(float sTime)
 
 		particleVec.push_back(pParticle);
 		//pFireBall->mPooledObject = true;
+
+		lightSystemRef->AddPointLight(&pParticle->lightData);
 	}
 }
 
@@ -148,5 +152,10 @@ void ParticleSystem::removeParticle(Particle* pParticleToDestroy)
 		}
 
 	}
+}
+
+void ParticleSystem::setLightingSystemRef(lightSystem::LightingSystem* system)
+{
+	lightSystemRef = system;
 }
 

@@ -38,15 +38,18 @@ namespace lightSystem {
             string pointStringStart = "pointLights[";
             for (int i = 0; i < pointLights.size(); i++)
             {
-                string pointString = pointStringStart + std::to_string(i);
-                shader->setVec3(pointString + "].color", pointLights[i]->color);
-                shader->setVec3(pointString + "].position", pointLights[i]->position);
-                shader->setFloat(pointString + "].ambient", pointLights[i]->ambient);
-                shader->setFloat(pointString + "].diffuse", pointLights[i]->diffuse);
-                shader->setFloat(pointString + "].specular", pointLights[i]->specular);
-                shader->setFloat(pointString + "].constant", pointLights[i]->constant);
-                shader->setFloat(pointString + "].linear", pointLights[i]->linear);
-                shader->setFloat(pointString + "].quadratic", pointLights[i]->quadratic);
+                if (pointLights[i] != nullptr)
+                {
+                    string pointString = pointStringStart + std::to_string(i);
+                    shader->setVec3(pointString + "].color", pointLights[i]->color);
+                    shader->setVec3(pointString + "].position", pointLights[i]->position);
+                    shader->setFloat(pointString + "].ambient", pointLights[i]->ambient);
+                    shader->setFloat(pointString + "].diffuse", pointLights[i]->diffuse);
+                    shader->setFloat(pointString + "].specular", pointLights[i]->specular);
+                    shader->setFloat(pointString + "].constant", pointLights[i]->constant);
+                    shader->setFloat(pointString + "].linear", pointLights[i]->linear);
+                    shader->setFloat(pointString + "].quadratic", pointLights[i]->quadratic);
+                }
             }
 
 

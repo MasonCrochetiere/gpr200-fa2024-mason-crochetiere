@@ -285,6 +285,8 @@ int main() {
 	lightSystem.AddPointLight(&myLight);
 	lightSystem.AddDirectionLight(&dirLight);
 
+	particleSystem.setLightingSystemRef(&lightSystem);
+
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
 		glfwPollEvents();
@@ -388,7 +390,7 @@ int main() {
 		// -------------------------------------RENDER LIGHT CUBE----------------------------\\
 
 		terrain.modelAndDraw();
-		backpack.Draw(litShader);
+		//backpack.Draw(litShader);
 		litShader.use();
 
 

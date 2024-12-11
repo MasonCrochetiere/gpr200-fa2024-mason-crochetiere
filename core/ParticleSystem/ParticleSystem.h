@@ -10,6 +10,7 @@
 #include "../MeshSystem/MeshRenderer.h"
 
 #include "../MeshSystem/meshGenerator.h"
+#include "../Lighting/LightingSystem.h"
 
 #include "ParticleSystemValues.h"
 
@@ -27,7 +28,11 @@ public:
 	void addParticle(float sTime);
 	void removeParticle(Particle* pParticleToDestroy);
 
+	void setLightingSystemRef(lightSystem::LightingSystem* system);
+
 private:
+	lightSystem::LightingSystem* lightSystemRef;
+
 	MemoryPool particlePool;
 	std::vector<Particle*> particleVec;
 
