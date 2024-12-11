@@ -189,9 +189,6 @@ int main() {
 		
 		float timeValue = glfwGetTime();
 
-		float currentFrame = static_cast<float>(glfwGetTime());
-		deltaTime = currentFrame - lastFrame;
-		lastFrame = currentFrame;
 
 		camera.updateTime(deltaTime);
 
@@ -227,19 +224,12 @@ int main() {
 		// -------------------------------------RENDER MESHES----------------------------\\
 
 		terrain.modelAndDraw();
-		//backpack.Draw(litShader);
-		litShader.use();
 
 		// -------------------------------------RENDER IMGUI----------------------------\\
 
 		//Create a window called Settings
 		ImGui::Begin("Settings");
-
 		ImGui::ColorEdit3("dirLight Color", &dirLight.color.r);
-		ImGui::ColorEdit3("Light Color", &myLight.color.r);
-		ImGui::SliderFloat("Ambient K", &myLight.ambient, 0.0f, 1.0f);
-		ImGui::SliderFloat("Diffuse K", &myLight.diffuse, 0.0f, 1.0f);
-		ImGui::SliderFloat("Specular K", &myLight.specular, 0.0f, 1.0f);
 
 		//Separate particle settings
 		ImGui::Checkbox("View Particle Settings", &seeParticleSettings);
