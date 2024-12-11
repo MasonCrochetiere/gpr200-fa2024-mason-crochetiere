@@ -93,6 +93,7 @@ unsigned int loadCubemap(std::vector<std::string> faces)
 }
 
 int main() {
+	//initialize window
 	printf("Initializing...");
 	if (!glfwInit()) {
 		printf("GLFW failed to init!");
@@ -109,17 +110,24 @@ int main() {
 		return 1;
 	}
 
+
+	//initialize camera
 	Camera camera(window);
 
+
+	//setup ImgGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init();
 
+
 	// configure global opengl state
 	// -----------------------------
 	glEnable(GL_DEPTH_TEST);
 
+
+	//intialize shaders
 	Shader unlitShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
 	Shader litShader("assets/defaultVertex.vert", "assets/litShader.frag");
 	Shader skyboxShader("assets/skyboxVert.vert", "assets/skyboxFrag.frag");
@@ -128,61 +136,51 @@ int main() {
 	shaderSystem.AddShader(&litShader);
 	shaderSystem.AddShader(&skyboxShader);
 
-	skybox::Skybox skybox(&skyboxShader);
 
+	//initialize skybox
+	skybox::Skybox skybox(&skyboxShader);
+	skybox.rotationSpeed = 0.02f;
+
+
+	//initialize terrain
 	meshSystem::MeshData planeMeshData;
 	meshSystem::generatePlane(10,10,256, &planeMeshData);
 	meshSystem::Mesh planeMesh = meshSystem::Mesh(planeMeshData);
 	planeMesh.addTexture("assets/grass.png", "texture_diffuse",litShader);
 	meshSystem::MeshRenderer terrain = MeshRenderer(planeMesh, Transform(), &litShader);
 
+
+	//initialize models
 	meshSystem::Model backpack = meshSystem::Model("assets/3DModels/backpack/backpack.obj");
 
-	std::vector<std::string> faces
-	{
-		"assets/skybox/newRight.png",
-		"assets/skybox/newLeft.png",
-		"assets/skybox/newTop.png",
-		"assets/skybox/newBottom.png",
-		"assets/skybox/newFront.png",
-		"assets/skybox/newBack.png"
-	};
-	unsigned int cubemapTexture = loadCubemap(faces);
+
+	//initialize light system
+	lightSystem::LightingSystem lightSystem(&litShader);
 
 
+	//initialize direction light
+	lightSystem::DirectionLight dirLight = lightSystem::DirectionLight();
+	lightSystem.AddDirectionLight(&dirLight);
 
-	// initializing the sphere
-	meshSystem::MeshData sphereMeshData;
-	meshSystem::createSphere(800.0f, 256, &sphereMeshData);
-	meshSystem::Mesh sphereMesh = meshSystem::Mesh(sphereMeshData);
-	meshSystem::MeshRenderer sphereRenderer = meshSystem::MeshRenderer(sphereMesh, &skyboxShader);
 
+	//initialize cube mesh
 	meshSystem::MeshData cubeMeshData;
-	//meshSystem::generatePlane(5.0f, 5.0f, 32, &cubeMeshData);
-
 	meshSystem::generateCube(1.0f, &cubeMeshData);
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
 
+
+	//initialize particle system
 	ParticleSystem particleSystem(32, &unlitShader, cubeMesh);
-
-	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &unlitShader);
-
-	lightSystem::LightingSystem lightSystem(&litShader);
-
-	lightSystem::PointLight myLight = lightSystem::PointLight();
-	lightSystem::DirectionLight dirLight = lightSystem::DirectionLight();
-	lightSystem.AddPointLight(&myLight);
-	lightSystem.AddDirectionLight(&dirLight);
-
 	particleSystem.setLightingSystemRef(&lightSystem);
 
 
+	//set light shader material values
 	litShader.use();
-
 	litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
 	litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
 	litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
 	litShader.setFloat("material.shininess", 32.0f);
+
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -211,47 +209,26 @@ int main() {
 
 		camera.processInput(window);
 
-		// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
+		// -------------------------------------UPDATE SYSTEMS----------------------------------\\
 
+
+		lightSystem.UpdateLighting(camera.getCameraPos());
+
+		shaderSystem.UpdateShaders(timeValue, SCREEN_WIDTH, SCREEN_HEIGHT);
+
+		skybox.Render(timeValue);
 
 		particleSystem.setSystemValues(particleValues);
 
 		particleSystem.updateSystem(timeValue, deltaTime, camera.getCameraPos());
 
-		lightSystem.UpdateLighting(camera.getCameraPos());
-
-
-		// ---------RENDER LOGIC (So most of it because graphics programming LOL)------------------\\
-
-
-		// -------------------------------------RENDER SKYBOX 1----------------------------\\
-
-		skybox.Render(timeValue);
-		
-
-
-
-		// -------------------------------------RENDER PARTICLE SYSTEM----------------------------\\
-
-
-
-
-
-		shaderSystem.UpdateShaders(timeValue, SCREEN_WIDTH, SCREEN_HEIGHT);
-
 		particleSystem.renderSystem();
 
+		// -------------------------------------RENDER MESHES----------------------------\\
 
-		// -------------------------------------RENDER LIGHT CUBE----------------------------\\
-
-		bigCube.modelAndDraw();
 		terrain.modelAndDraw();
 		//backpack.Draw(litShader);
 		litShader.use();
-
-
-		// -------------------------------------RENDER SKYBOX 2----------------------------\\
-
 
 		// -------------------------------------RENDER IMGUI----------------------------\\
 
@@ -259,7 +236,6 @@ int main() {
 		ImGui::Begin("Settings");
 
 		ImGui::ColorEdit3("dirLight Color", &dirLight.color.r);
-		ImGui::DragFloat3("Light Position", &myLight.position.x, 0.1f);
 		ImGui::ColorEdit3("Light Color", &myLight.color.r);
 		ImGui::SliderFloat("Ambient K", &myLight.ambient, 0.0f, 1.0f);
 		ImGui::SliderFloat("Diffuse K", &myLight.diffuse, 0.0f, 1.0f);

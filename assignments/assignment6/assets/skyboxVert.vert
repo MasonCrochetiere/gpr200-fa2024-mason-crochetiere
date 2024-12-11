@@ -4,6 +4,7 @@ layout (location = 0) in vec3 aPos;
 out vec3 TexCoords;
 
 uniform float uTime;
+uniform float rotationSpeed;
 uniform mat4 model;
 uniform mat4 view;
 uniform mat4 projection;
@@ -28,7 +29,7 @@ mat4 rotationX(float angle)
 }
 void main()
 {
-    mat4 rotatedView = view * rotationX(-0.1 * uTime) * rotationY(-0.1 * uTime);
+    mat4 rotatedView = view * rotationX(-0.1 * rotationSpeed * uTime) * rotationY(-0.1 * rotationSpeed * uTime);
     
     TexCoords = aPos;
     gl_Position = projection * rotatedView * vec4(aPos, 1.0);

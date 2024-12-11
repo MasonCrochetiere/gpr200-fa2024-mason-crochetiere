@@ -16,6 +16,7 @@ namespace skybox
 		Skybox(Shader* newShader);
 		unsigned int loadCubemap(std::vector<std::string> faces);
 		void Render(float timeValue);
+		float rotationSpeed;
 	private:
 		unsigned int cubemapTexture;
 		Shader* shader;

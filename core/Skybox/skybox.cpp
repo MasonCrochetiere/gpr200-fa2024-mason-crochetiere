@@ -59,6 +59,7 @@ namespace skybox
 		glm::mat4 sphereSpin = glm::mat4(1.0f);
 		sphereSpin = glm::rotate(sphereSpin, timeValue * glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 1.0f));
 		shader->setMat4("model", sphereSpin);
+		shader->setFloat("rotationSpeed", rotationSpeed);
 		sphereRenderer->modelAndDraw();
 	}
 }
