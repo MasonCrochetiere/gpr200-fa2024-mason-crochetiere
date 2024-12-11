@@ -53,6 +53,7 @@ namespace lightSystem {
         void AddDirectionLight(DirectionLight *directionLight);
         void AddPointLight(PointLight *pointLight);
         void AddSpotLight(SpotLight *spotLight);
+        void RemovePointLight(PointLight* pointLight);
         void AddShader(macroLib::Shader* newShader);
     private:
         std::vector<macroLib::Shader*> shaders;

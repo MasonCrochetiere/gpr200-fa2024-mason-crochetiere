@@ -83,6 +83,8 @@ void ParticleSystem::renderSystem()
 	for (unsigned int i = 0; i < particleVec.size(); i++)
 	{
 		Particle* pTarget = particleVec.at(i);
+		particleShader->use();
+		particleShader->setVec3("color", glm::vec3(1.0f, 1.0f, 0.0f));
 		pTarget->renderParticle();
 	}
 }
@@ -143,6 +145,7 @@ void ParticleSystem::removeParticle(Particle* pParticleToDestroy)
 		Particle* pTarget = particleVec.at(i);
 		if (pTarget == pParticleToDestroy)
 		{
+			lightSystemRef->RemovePointLight(&pTarget->lightData);
 			pTarget->~Particle();
 			particlePool.freeObject((Byte*)pTarget);
 

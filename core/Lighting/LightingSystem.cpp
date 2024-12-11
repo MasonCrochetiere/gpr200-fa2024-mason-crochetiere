@@ -81,6 +81,14 @@ namespace lightSystem {
     {
         pointLights.push_back(pointLight);
     }
+    void LightingSystem::RemovePointLight(PointLight* pointLight)
+    {
+        std::vector<PointLight*>::const_iterator position = std::find(pointLights.begin(), pointLights.end(), pointLight);
+        if (position != pointLights.end())
+        {
+            pointLights.erase(position);
+        }
+    }
     void LightingSystem::AddSpotLight(SpotLight *spotLight)
     {
         spotLights.push_back(spotLight);

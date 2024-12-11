@@ -274,9 +274,9 @@ int main() {
 	meshSystem::generateCube(1.0f, &cubeMeshData);
 	meshSystem::Mesh cubeMesh = meshSystem::Mesh(cubeMeshData);
 
-	ParticleSystem particleSystem(32, &litShader, cubeMesh);
+	ParticleSystem particleSystem(32, &unlitShader, cubeMesh);
 
-	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &litShader);
+	meshSystem::MeshRenderer bigCube = MeshRenderer(cubeMesh, Transform(), &unlitShader);
 
 	lightSystem::LightingSystem lightSystem(&litShader);
 
@@ -316,11 +316,12 @@ int main() {
 
 		// -------------------------------------OBJECT/GAME LOGIC----------------------------------\\
 
-		litShader.use();
 
 		particleSystem.setSystemValues(particleValues);
 
 		particleSystem.updateSystem(timeValue, deltaTime, camera.getCameraPos());
+
+		litShader.use();
 
 		lightSystem.UpdateLighting(camera.getCameraPos());
 
@@ -380,15 +381,23 @@ int main() {
 		particleSystem.renderSystem();
 
 
+		litShader.use();
+
 
 		int viewLoc = glGetUniformLocation(litShader.ID, "view");
 		litShader.setMat4("view", view);
 
-		int projectionLoc = glGetUniformLocation(litShader.ID, "projection");
-		litShader.setMat4("projection", projection);
+		unlitShader.use();
+		unlitShader.setMat4("projection", projection);
+
+		// setting uniform values. probably want to get the vertex locations outside of update for efficiency
+		unlitShader.setFloat("uTime", timeValue);
+
+		unlitShader.setMat4("view", view);
 
 		// -------------------------------------RENDER LIGHT CUBE----------------------------\\
 
+		bigCube.modelAndDraw();
 		terrain.modelAndDraw();
 		//backpack.Draw(litShader);
 		litShader.use();
@@ -399,16 +408,12 @@ int main() {
 		litShader.setMat4("model", model);
 		litShader.setVec3("lightColor", lightColor);
 
-		bigCube.transform.position = myLight.position;
-		bigCube.transform.scale = glm::vec3(0.3f);
-		bigCube.modelAndDraw();
-
 		// -------------------------------------RENDER SKYBOX 2----------------------------\\
 		
 		skyboxShader.use();
 		skyboxShader.setMat4("view", view);
 		skyboxShader.setMat4("projection", projection);
-		skyboxShader.setFloat("uTime", timeValue);
+		skyboxShader.setFloat("uTime", timeValue / 10.0f);
 		// ... draw the rest of the scene
 
 		// -------------------------------------RENDER IMGUI----------------------------\\
