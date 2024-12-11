@@ -17,10 +17,18 @@ mat4 rotationY(float angle)
         0, 0, 0, 1
     );
 }
-
+mat4 rotationX(float angle)
+{
+    return mat4(
+        1, 0, 0, 0,
+        0, cos(angle), -sin(angle), 0,
+        0, sin(angle), cos(angle), 0,
+        0, 0, 0, 1
+    );
+}
 void main()
 {
-    mat4 rotatedView = view * rotationY(0.1 * uTime);
+    mat4 rotatedView = view * rotationX(-0.1 * uTime) * rotationY(-0.1 * uTime);
     
     TexCoords = aPos;
     gl_Position = projection * rotatedView * vec4(aPos, 1.0);
