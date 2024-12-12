@@ -100,7 +100,7 @@ int main() {
 	Shader unlitShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
 	Shader litShader("assets/defaultVertex.vert", "assets/litShader.frag");
 	Shader skyboxShader("assets/skyboxVert.vert", "assets/skyboxFrag.frag");
-	Shader terrainShader("assets/terrainVertex.vert", "assets/litShader.frag");
+	Shader terrainShader("assets/terrainVertex.vert", "assets/terrainLit.frag");
 	ShaderSystem shaderSystem = ShaderSystem(&camera);
 	shaderSystem.AddShader(&unlitShader);
 	shaderSystem.AddShader(&litShader);
