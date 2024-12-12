@@ -52,7 +52,7 @@ namespace macroLib
         float fov = 60.0f;
 
         float defaultSpeed = 2.5f;
-        float sprintSpeed = 2.0f;
+        float sprintSpeed = 5.0f;
 
         // timing
         float deltaTime = 0.0f;	// time between current frame and last frame

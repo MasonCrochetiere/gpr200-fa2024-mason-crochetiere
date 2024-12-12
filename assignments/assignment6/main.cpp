@@ -25,6 +25,7 @@
 #include <MeshSystem/meshGenerator.h>
 #include <MeshSystem/MeshRenderer.h>
 #include <MeshSystem/Model.h>
+#include <MeshSystem/terrain.h>
 
 #include <ParticleSystem/MemoryPool.h>
 #include <ParticleSystem/ParticleSystem.h>
@@ -54,6 +55,9 @@ bool seeParticleSettings;
 bool seeParticleTransform;
 bool seeParticleVelocity;
 bool seeParticleSpawn;
+
+bool seeLightSettings;
+bool seeTerrainSettings;
 
 ParticleSystemValues particleValues;
 
@@ -96,10 +100,12 @@ int main() {
 	Shader unlitShader("assets/defaultVertex.vert", "assets/unlitShader.frag");
 	Shader litShader("assets/defaultVertex.vert", "assets/litShader.frag");
 	Shader skyboxShader("assets/skyboxVert.vert", "assets/skyboxFrag.frag");
+	Shader terrainShader("assets/terrainVertex.vert", "assets/litShader.frag");
 	ShaderSystem shaderSystem = ShaderSystem(&camera);
 	shaderSystem.AddShader(&unlitShader);
 	shaderSystem.AddShader(&litShader);
 	shaderSystem.AddShader(&skyboxShader);
+	shaderSystem.AddShader(&terrainShader);
 
 
 	//initialize skybox
@@ -108,19 +114,16 @@ int main() {
 
 
 	//initialize terrain
-	meshSystem::MeshData planeMeshData;
-	meshSystem::generatePlane(10,10,256, &planeMeshData);
-	meshSystem::Mesh planeMesh = meshSystem::Mesh(planeMeshData);
-	planeMesh.addTexture("assets/grass.png", "texture_diffuse",litShader);
-	meshSystem::MeshRenderer terrain = MeshRenderer(planeMesh, Transform(), &litShader);
+	meshSystem::Terrain terrain = Terrain(&terrainShader, "assets/grass.png", "assets/iceland_heightmap.png", glm::vec3(300.0f, 100.0f, 300.0f));
 
 
 	//initialize models
-	meshSystem::Model backpack = meshSystem::Model("assets/3DModels/backpack/backpack.obj");
+	//meshSystem::Model tree = meshSystem::Model("assets/3DModels/tree/Low Poly Tree.obj");
 
 
 	//initialize light system
 	lightSystem::LightingSystem lightSystem(&litShader);
+	lightSystem.AddShader(&terrainShader);
 
 
 	//initialize direction light
@@ -137,15 +140,6 @@ int main() {
 	//initialize particle system
 	ParticleSystem particleSystem(32, &unlitShader, cubeMesh);
 	particleSystem.setLightingSystemRef(&lightSystem);
-
-
-	//set light shader material values
-	litShader.use();
-	litShader.setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
-	litShader.setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
-	litShader.setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
-	litShader.setFloat("material.shininess", 32.0f);
-
 
 	//Render loop
 	while (!glfwWindowShouldClose(window)) {
@@ -174,28 +168,42 @@ int main() {
 
 		// -------------------------------------UPDATE SYSTEMS----------------------------------\\
 
-
 		lightSystem.UpdateLighting(camera.getCameraPos());
 
 		shaderSystem.UpdateShaders(timeValue, SCREEN_WIDTH, SCREEN_HEIGHT);
-
-		skybox.Render(timeValue);
 
 		particleSystem.setSystemValues(particleValues);
 
 		particleSystem.updateSystem(timeValue, deltaTime, camera.getCameraPos());
 
-		particleSystem.renderSystem();
 
 		// -------------------------------------RENDER MESHES----------------------------\\
 
-		terrain.modelAndDraw();
+		particleSystem.renderSystem();
+
+		skybox.Render(timeValue);
+
+		terrain.Draw();
 
 		// -------------------------------------RENDER IMGUI----------------------------\\
 
 		//Create a window called Settings
 		ImGui::Begin("Settings");
-		ImGui::ColorEdit3("dirLight Color", &dirLight.color.r);
+
+		ImGui::Checkbox("View Light Settings", &seeLightSettings);
+		if (seeLightSettings)
+		{
+			ImGui::ColorEdit3("dirLight Color", &dirLight.color.r);
+			ImGui::SliderFloat("dirLight Brightness", &dirLight.diffuse, 0.0f, 1.0f);
+		}
+
+		ImGui::Checkbox("View Terrain Settings", &seeTerrainSettings);
+
+		if (seeTerrainSettings)
+		{
+			ImGui::SliderFloat("Terrain Height", &terrain.height, 0.0f, 10.0f);
+			ImGui::SliderFloat("Terrain Peaks", &terrain.peaking, 0.0f, 10.0f);
+		}
 
 		//Separate particle settings
 		ImGui::Checkbox("View Particle Settings", &seeParticleSettings);
@@ -254,7 +262,6 @@ int main() {
 
 		// -------------------------------------COMPLETE DRAW----------------------------\\
 
-		//Drawing happens here!
 		glfwSwapBuffers(window);
 
 	}

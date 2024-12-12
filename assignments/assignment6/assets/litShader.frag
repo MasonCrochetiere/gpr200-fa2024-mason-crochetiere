@@ -1,3 +1,5 @@
+//written by reece
+
 #version 330 core
 #define MAX_DIR_LIGHTS 8
 #define MAX_POINT_LIGHTS 8
@@ -72,6 +74,7 @@ uniform SpotLight light;
 
 void main()
 {
+
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
 

@@ -8,6 +8,7 @@ namespace lightSystem {
         directionLights = std::vector<DirectionLight*>();
         pointLights = std::vector<PointLight*>();
         spotLights = std::vector<SpotLight*>();
+        SetupMaterialUniforms(newShader);
     }
     void LightingSystem::UpdateLighting(glm::vec3 viewPos)
     {
@@ -19,7 +20,6 @@ namespace lightSystem {
             shader->setFloat("numDirLights", directionLights.size());
             shader->setFloat("numPointLights", pointLights.size());
             shader->setFloat("numSpotLights", spotLights.size());
-
 
             //Direction Lights
             string directionStringStart = "dirLights[";
@@ -96,5 +96,13 @@ namespace lightSystem {
     void LightingSystem::AddShader(macroLib::Shader* newShader)
     {
         shaders.push_back(newShader);
+        SetupMaterialUniforms(newShader);
+    }
+    void LightingSystem::SetupMaterialUniforms(macroLib::Shader* shader)
+    {
+        shader->setVec3("material.ambient", glm::vec3(1.0f, 0.5f, 0.31f));
+        shader->setVec3("material.diffuse", glm::vec3(1.0f, 0.5f, 0.31f));
+        shader->setVec3("material.specular", glm::vec3(0.5f, 0.5f, 0.5f));
+        shader->setFloat("material.shininess", 32.0f);
     }
 }
