@@ -138,7 +138,7 @@ int main() {
 
 
 	//initialize particle system
-	ParticleSystem particleSystem(32, &unlitShader, cubeMesh);
+	ParticleSystem particleSystem(16, &unlitShader, cubeMesh);
 	particleSystem.setLightingSystemRef(&lightSystem);
 
 	//Render loop

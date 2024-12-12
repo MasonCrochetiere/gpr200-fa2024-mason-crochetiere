@@ -2,7 +2,7 @@
 
 #version 330 core
 #define MAX_DIR_LIGHTS 8
-#define MAX_POINT_LIGHTS 8
+#define MAX_POINT_LIGHTS 17
 #define MAX_SPOT_LIGHTS 8
 out vec4 FragColor;
 // in vec4 Color;
