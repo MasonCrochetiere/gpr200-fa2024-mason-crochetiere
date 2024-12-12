@@ -78,7 +78,7 @@ void main()
     vec3 norm = normalize(Normal);
     vec3 viewDir = normalize(viewPos - FragPos);
 
-    vec3 result;
+    vec3 result; 
 
     //directional light
     for(int i = 0;i < numDirLights;i++)
