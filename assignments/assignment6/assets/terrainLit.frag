@@ -73,16 +73,30 @@ uniform SpotLight spotLights[MAX_SPOT_LIGHTS];
 uniform Material material;
 uniform SpotLight light;
 
-bool high = false;
+vec3 highColor = vec3(0.8,0.8,0.8);
+vec3 midColor = vec3(1,1,1);
+vec3 lowColor = vec3(0.5,1,0.5);
+vec3 lowestColor = vec3(0.3,1,0.3);
+
+in float aHeight;
+in float aPeaking;
 
 void main()
 {
-    float height = texture(heightmap,TexCoord).r;
+    float height = pow(texture(heightmap,TexCoord).r,aPeaking) * aHeight;
     
 
-    if(height > 0.5f)
+    if(height < 0.3f)
     {
-        high = true;
+        highColor *= 0;
+    }
+    if(height < 0.05f)
+    {
+        midColor *= 0;
+    }
+    if(height < 0.001)
+    {
+        lowColor *= 0;
     }
 
 
@@ -119,18 +133,11 @@ vec3 CalcDirLight(DirLight light,vec3 normal,vec3 viewDir)
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
-    if(high)
-    {
-        ambient = light.ambient * texture(highTexture, TexCoord).rgb;
-        diffuse = light.diffuse * diff * texture(highTexture, TexCoord).rgb;
-        specular = light.specular * spec * texture(highTexture, TexCoord).rgb;
-    }
-    else
-    {
-        ambient = light.ambient * texture(material.diffuse, TexCoord).rgb;
-        diffuse = light.diffuse * diff * texture(material.diffuse, TexCoord).rgb;
-        specular = light.specular * spec * texture(material.diffuse, TexCoord).rgb;
-    }
+
+        ambient = light.ambient * (highColor + midColor + lowColor + lowestColor);
+        diffuse = light.diffuse * diff *  (highColor + midColor + lowColor + lowestColor);
+        specular = light.specular * spec *  (highColor + midColor + lowColor + lowestColor);
+   
 
     return (ambient + diffuse + specular) * light.color;
 }
@@ -149,18 +156,11 @@ vec3 CalcPointLight(PointLight light,vec3 normal,vec3 fragPos,vec3 viewDir)
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
-    if(high)
-    {
-        ambient = light.ambient * texture(highTexture, TexCoord).rgb;
-        diffuse = light.diffuse * diff * texture(highTexture, TexCoord).rgb;
-        specular = light.specular * spec * texture(highTexture, TexCoord).rgb;
-    }
-    else
-    {
-        ambient = light.ambient * texture(material.diffuse, TexCoord).rgb;
-        diffuse = light.diffuse * diff * texture(material.diffuse, TexCoord).rgb;
-        specular = light.specular * spec * texture(material.diffuse, TexCoord).rgb;
-    }
+    
+        ambient = light.ambient *  (highColor + midColor + lowColor + lowestColor);
+        diffuse = light.diffuse * diff *  (highColor + midColor + lowColor + lowestColor);
+        specular = light.specular * spec * (highColor + midColor + lowColor + lowestColor);
+    
     ambient *= attenuation;
     diffuse *= attenuation;
     specular *= attenuation;
@@ -185,18 +185,11 @@ vec3 CalcSpotLight(SpotLight light, vec3 normal,vec3 fragPos,vec3 viewDir)
     vec3 ambient;
     vec3 diffuse;
     vec3 specular;
-    if(high)
-    {
-        ambient = light.ambient * texture(highTexture, TexCoord).rgb;
-        diffuse = light.diffuse * diff * texture(highTexture, TexCoord).rgb;
-        specular = light.specular * spec * texture(highTexture, TexCoord).rgb;
-    }
-    else
-    {
-        ambient = light.ambient * texture(material.diffuse, TexCoord).rgb;
-        diffuse = light.diffuse * diff * texture(material.diffuse, TexCoord).rgb;
-        specular = light.specular * spec * texture(material.diffuse, TexCoord).rgb;
-    }
+    
+        ambient = light.ambient * (highColor + midColor + lowColor + lowestColor);
+        diffuse = light.diffuse * diff * (highColor + midColor + lowColor + lowestColor);
+        specular = light.specular * spec * (highColor + midColor + lowColor + lowestColor);
+    
     ambient *= attenuation * intensity;
     diffuse *= attenuation * intensity;
     specular *= attenuation * intensity;

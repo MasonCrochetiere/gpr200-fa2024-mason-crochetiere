@@ -16,7 +16,7 @@ namespace skybox
 		};
 		unsigned int cubemapTexture = loadCubemap(faces);
 
-		meshSystem::createSphere(800.0f, 256, &sphereMeshData);
+		meshSystem::createSphere(8000.0f, 256, &sphereMeshData);
 		sphereMesh = meshSystem::Mesh(sphereMeshData);
 		sphereRenderer = new meshSystem::MeshRenderer(sphereMesh, shader);
 	}

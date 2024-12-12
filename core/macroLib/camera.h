@@ -40,7 +40,7 @@ namespace macroLib
 
 
         const float NEAR_PLANE = 0.1f;
-        const float FAR_PLANE = 1000.0f;
+        const float FAR_PLANE = 10000.0f;
     private:
         bool firstMouse = true;
 

@@ -14,7 +14,7 @@ namespace meshSystem
 		mesh = meshSystem::Mesh(meshData);
 		mesh.addTexture(texturePath, "texture_diffuse", *shader);
 		renderer = new MeshRenderer(mesh, Transform(), shader);
-        renderer->transform.position = glm::vec3(-400.0f , -50.0f, -400.0f);
+        renderer->transform.position = glm::vec3(-1000.0f , -50.0f, -1000.0f);
         renderer->transform.scale = scale;
 
 		 heightMapID = SetupTexture(heightMapPath);
