@@ -1,3 +1,4 @@
+//Author: Conor Byrne
 #include "skybox.h"
 
 namespace skybox
