@@ -1,3 +1,4 @@
+//Author: Conor Byrne
 #include "../macroLib/shader.h"
 #include <vector>
 #include "../MeshSystem/mesh.h"
