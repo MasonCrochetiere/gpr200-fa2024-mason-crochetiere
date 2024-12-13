@@ -25,8 +25,12 @@ ParticleSystem::~ParticleSystem()
 	particleVec.clear();
 }
 
+// This update particle system function handles particle emission and simulation;
+// both of these belong in a 'game update' esc phase
+// the rendering phase should happen alongside other rendering in main/etc and not alongside these simulative updates
 void ParticleSystem::updateSystem(float currentTime, float deltaTime, glm::vec3 cameraPos)
 {
+	// Emission phase
 	if (currentTime - lastParticleSpawn >= particleValues.timeBetweenSpawns)
 	{
 		//cout << "Making particle!" << endl;
@@ -35,6 +39,7 @@ void ParticleSystem::updateSystem(float currentTime, float deltaTime, glm::vec3 
 		lastParticleSpawn = currentTime;
 	}
 
+	// Particle destruction phase
 	for (unsigned int i = 0; i < particleVec.size(); i++)
 	{
 		if (currentTime - particleVec.at(i)->getStartTime() >= particleValues.particleLifetime)
@@ -45,20 +50,21 @@ void ParticleSystem::updateSystem(float currentTime, float deltaTime, glm::vec3 
 
 	destroyQueuedParticles();
 
+	// Particle simulation phase
+	// Moves each of the particles via its assigned velocity
+	// and is also responsible for making particles run away from the camera. 
 	glm::vec3 avoidLoc = cameraPos;
-	glm::vec3 pVec;
-	float avoidRadius = 6.0f;
-	float avoidSpeed = 10.0f;
+	glm::vec3 particleVec;
 
 	for (unsigned int i = 0; i < particleVec.size(); i++)
 	{
-		pVec = particleVec.at(i)->pRenderer->transform.position;
-		float dist = glm::distance(pVec, avoidLoc);
+		particleVec = particleVec.at(i)->pRenderer->transform.position;
+		float dist = glm::distance(particleVec, avoidLoc);
 
 		if (dist < avoidRadius)
 		{
 			// run away
-			glm::vec3 dir = glm::normalize(pVec - avoidLoc);
+			glm::vec3 dir = glm::normalize(particleVec - avoidLoc);
 			particleVec.at(i)->pRenderer->transform.position += dir * avoidSpeed * deltaTime;
 			//float dir = 
 		}
@@ -78,6 +84,7 @@ void ParticleSystem::destroyQueuedParticles()
 	particlesToDestroyVec.clear();
 }
 
+// rendering phase
 void ParticleSystem::renderSystem()
 {
 	for (unsigned int i = 0; i < particleVec.size(); i++)
@@ -102,6 +109,7 @@ void ParticleSystem::addParticle(float sTime)
 		//std::cout << "MAKING A UNIT" << endl;
 		Particle* pParticle = new (ptr)Particle(particleMesh, *particleShader, sTime);
 
+		// Generating random values
 		if (particleValues.useRandomPosition)
 		{
 			glm::vec3 pos(1.0);
@@ -130,9 +138,9 @@ void ParticleSystem::addParticle(float sTime)
 		}
 
 		pParticle->velocityOffset = vOffset;
+		// Random value generation complete. Just adding to the particle vector now
 
 		particleVec.push_back(pParticle);
-		//pFireBall->mPooledObject = true;
 
 		lightSystemRef->AddPointLight(&pParticle->lightData);
 	}

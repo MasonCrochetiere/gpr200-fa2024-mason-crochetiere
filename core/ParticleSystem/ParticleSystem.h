@@ -1,3 +1,6 @@
+// This particle system class was created by Mason Crochetiere
+// it pulls from Dean Lawson's library to make it function within the Object Pool it is used in
+
 #pragma once
 
 #include "../DeanLib/include/DeanLibDefines.h"
@@ -47,5 +50,8 @@ private:
 	ParticleSystemValues particleValues;
 
 	float lastParticleSpawn = 0.0f;
+
+	float avoidRadius = 6.0f;
+	float avoidSpeed = 10.0f;
 
 };

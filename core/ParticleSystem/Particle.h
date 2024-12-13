@@ -1,5 +1,8 @@
 #pragma once
 
+// This particle class was created by Mason Crochetiere
+// it pulls from Dean Lawson's library to make it function within the Object Pool it is used in
+
 #include "../DeanLib/include/DeanLibDefines.h"
 #include "../DeanLib/include/CircularQueue.h"
 #include "../DeanLib/include/Trackable.h"

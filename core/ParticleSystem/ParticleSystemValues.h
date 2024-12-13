@@ -1,3 +1,7 @@
+// This particle struct was created by Mason Crochetiere
+// It is simply a list of values utilized by the particle system to manipulate particles
+// The base values are set to perform the firefly particle simulation
+
 #pragma once
 #include <glm/glm.hpp>
 
