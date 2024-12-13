@@ -54,17 +54,17 @@ void ParticleSystem::updateSystem(float currentTime, float deltaTime, glm::vec3 
 	// Moves each of the particles via its assigned velocity
 	// and is also responsible for making particles run away from the camera. 
 	glm::vec3 avoidLoc = cameraPos;
-	glm::vec3 particleVec;
+	glm::vec3 pVec;
 
 	for (unsigned int i = 0; i < particleVec.size(); i++)
 	{
-		particleVec = particleVec.at(i)->pRenderer->transform.position;
-		float dist = glm::distance(particleVec, avoidLoc);
+		pVec = particleVec.at(i)->pRenderer->transform.position;
+		float dist = glm::distance(pVec, avoidLoc);
 
 		if (dist < avoidRadius)
 		{
 			// run away
-			glm::vec3 dir = glm::normalize(particleVec - avoidLoc);
+			glm::vec3 dir = glm::normalize(pVec - avoidLoc);
 			particleVec.at(i)->pRenderer->transform.position += dir * avoidSpeed * deltaTime;
 			//float dir = 
 		}
